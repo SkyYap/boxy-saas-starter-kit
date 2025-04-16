@@ -8,6 +8,11 @@ import FAQSection from '@/components/defaultLanding/FAQSection';
 import HeroSection from '@/components/defaultLanding/HeroSection';
 import FeatureSection from '@/components/defaultLanding/FeatureSection';
 import PricingSection from '@/components/defaultLanding/PricingSection';
+import HeroSection2 from '@/components/newLanding/HeroSection2';
+import FeatureSection2 from '@/components/newLanding/FeatureSection2';
+import PricingSection2 from '@/components/newLanding/PricingSection2';
+import FAQSection2 from '@/components/newLanding/FAQSection2';
+import FooterSection from '@/components/newLanding/FooterSection';
 import useTheme from 'hooks/useTheme';
 import env from '@/lib/env';
 import Head from 'next/head';
@@ -23,7 +28,7 @@ const Home: NextPageWithLayout = () => {
       </Head>
 
       <div className="container mx-auto">
-        <div className="navbar bg-base-100 px-0 sm:px-1">
+        {/* <div className="navbar bg-base-100 px-0 sm:px-1">
           <div className="flex-1">
             <Link href="/" className="btn btn-ghost text-xl normal-case">
               BoxyHQ
@@ -59,14 +64,24 @@ const Home: NextPageWithLayout = () => {
               </li>
             </ul>
           </div>
-        </div>
-        <HeroSection />
+        </div> */}
+        {/* <HeroSection />
         <div className="divider"></div>
         <FeatureSection />
         <div className="divider"></div>
         <PricingSection />
         <div className="divider"></div>
         <FAQSection />
+        <div className="divider"></div> */}
+        <HeroSection2 />
+        <div className="divider"></div>
+        <FeatureSection2 />
+        <div className="divider"></div>
+        <PricingSection2 />
+        <div className="divider"></div>
+        <FAQSection2 />
+        <div className="divider"></div>
+        <FooterSection />
       </div>
     </>
   );

@@ -3,17 +3,27 @@ import { SessionProvider } from 'next-auth/react';
 import { appWithTranslation } from 'next-i18next';
 import Head from 'next/head';
 import { Toaster } from 'react-hot-toast';
-import colors from 'tailwindcss/colors';
 import type { AppPropsWithLayout } from 'types';
 import mixpanel from 'mixpanel-browser';
+import { Geist, Geist_Mono } from 'next/font/google';
+import { ThemeProvider } from '@/components/theme-provider';
 
 import '@boxyhq/react-ui/dist/react-ui.css';
 import '../styles/globals.css';
 import { useEffect } from 'react';
 import env from '@/lib/env';
 import { Theme, applyTheme } from '@/lib/theme';
-import { Themer } from '@boxyhq/react-ui/shared';
 import { AccountLayout } from '@/components/layouts';
+
+const geistSans = Geist({
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
+});
+
+const geistMono = Geist_Mono({
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
+});
 
 function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   const { session, ...props } = pageProps;
@@ -43,25 +53,16 @@ function MyApp({ Component, pageProps }: AppPropsWithLayout) {
         <link rel="icon" href="https://boxyhq.com/img/favicon.ico" />
       </Head>
       <SessionProvider session={session}>
-        <Toaster toastOptions={{ duration: 4000 }} />
-        <Themer
-          overrideTheme={{
-            '--primary-color': colors.blue['500'],
-            '--primary-hover': colors.blue['600'],
-            '--primary-color-50': colors.blue['50'],
-            '--primary-color-100': colors.blue['100'],
-            '--primary-color-200': colors.blue['200'],
-            '--primary-color-300': colors.blue['300'],
-            '--primary-color-500': colors.blue['500'],
-            '--primary-color-600': colors.blue['600'],
-            '--primary-color-700': colors.blue['700'],
-            '--primary-color-800': colors.blue['800'],
-            '--primary-color-900': colors.blue['900'],
-            '--primary-color-950': colors.blue['950'],
-          }}
-        >
-          {getLayout(<Component {...props} />)}
-        </Themer>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange>
+          <div className={`${geistSans.variable} ${geistMono.variable} overflow-x-hidden antialiased`}>
+            <Toaster toastOptions={{ duration: 4000 }} />
+            {getLayout(<Component {...props} />)}
+          </div>
+        </ThemeProvider>
       </SessionProvider>
     </>
   );
