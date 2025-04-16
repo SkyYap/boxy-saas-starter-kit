@@ -15,6 +15,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'files.stripe.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
     ],
   },
   i18n,

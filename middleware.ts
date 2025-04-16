@@ -71,6 +71,8 @@ const unAuthenticatedRoutes = [
   '/unlock-account',
   '/login/saml',
   '/.well-known/*',
+  '/mail2.png',
+  '/mail2-light.png',
 ];
 
 export default async function middleware(req: NextRequest) {
