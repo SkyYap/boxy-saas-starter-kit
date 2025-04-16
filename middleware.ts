@@ -73,6 +73,12 @@ const unAuthenticatedRoutes = [
   '/.well-known/*',
   '/mail2.png',
   '/mail2-light.png',
+  '/charts.png',
+  '/charts-light.png',
+  '/payments.png',
+  '/payments-light.png',
+  '/music.png',
+  '/music-light.png',
 ];
 
 export default async function middleware(req: NextRequest) {
