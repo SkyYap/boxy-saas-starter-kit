@@ -156,7 +156,7 @@ const InviteViaLink = ({ team }: InviteViaLinkProps) => {
           color="primary"
           loading={formik.isSubmitting}
           disabled={!formik.isValid}
-          className="flex-grow"
+          className="grow"
         >
           {t('create-link')}
         </Button>

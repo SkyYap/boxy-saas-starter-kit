@@ -59,7 +59,7 @@ const Header = ({ setSidebarOpen }: HeaderProps) => {
             </div>
             <ul
               tabIndex={0}
-              className="dropdown-content z-[1] menu p-2 shadow bg-base-100 border rounded w-40 space-y-1"
+              className="dropdown-content z-1 menu p-2 shadow-sm bg-base-100 border rounded w-40 space-y-1"
             >
               <li
                 onClick={() => {

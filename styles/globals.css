@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
 @plugin 'tailwindcss-animate';
 
@@ -114,7 +112,7 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
+    --radius: 0.5rem
   }
 
   .dark {
@@ -148,19 +146,6 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
-
-/*
-  ---break---
-*/
-
-@layer base {
-  * {
-    @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
