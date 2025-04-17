@@ -6,7 +6,7 @@ import { Toaster } from 'react-hot-toast';
 import type { AppPropsWithLayout } from 'types';
 import mixpanel from 'mixpanel-browser';
 import { Geist, Geist_Mono } from 'next/font/google';
-import { ThemeProvider } from '@/components/theme-provider';
+import { ThemeProvider } from '@/lib/components/theme-provider';
 
 import '@boxyhq/react-ui/dist/react-ui.css';
 import '../styles/globals.css';
