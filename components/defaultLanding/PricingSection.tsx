@@ -1,103 +1,69 @@
-import Link from 'next/link'
-import { Button } from '@/lib/components/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/lib/components/ui/card'
-import { Check } from 'lucide-react'
+import { CheckIcon } from '@heroicons/react/20/solid';
+import { useTranslation } from 'next-i18next';
+import { Button, Card } from 'react-daisyui';
 
-export default function Pricing() {
-    return (
-        <section className="py-16 md:py-32">
-            <div className="mx-auto max-w-6xl px-6">
-                <div className="mx-auto max-w-2xl space-y-6 text-center">
-                    <h1 className="text-center text-4xl font-semibold lg:text-5xl">Pricing that Scales with You</h1>
-                    <p>Gemini is evolving to be more than just the models. It supports an entire to the APIs and platforms helping developers and businesses innovate.</p>
-                </div>
+import plans from './data/pricing.json';
 
-                <div className="mt-8 grid gap-6 md:mt-20 md:grid-cols-3">
-                    <Card className="flex flex-col">
-                        <CardHeader>
-                            <CardTitle className="font-medium">Free</CardTitle>
-                            <span className="my-3 block text-2xl font-semibold">$0 / mo</span>
-                            <CardDescription className="text-sm">Per editor</CardDescription>
-                        </CardHeader>
+const PricingSection = () => {
+  const { t } = useTranslation('common');
+  return (
+    <section className="py-6">
+      <div className="flex flex-col justify-center space-y-6">
+        <h2 className="text-center text-4xl font-bold normal-case">
+          {t('pricing')}
+        </h2>
+        <p className="text-center text-xl">
+          Lorem Ipsum is simply dummy text of the printing and typesetting
+          industry.
+        </p>
+        <div className="flex items-center justify-center">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            {plans.map((plan, index) => {
+              return (
+                <Card
+                  key={`plan-${index}`}
+                  className="rounded-md dark:border-gray-200 border border-gray-300"
+                >
+                  <Card.Body>
+                    <Card.Title tag="h2">
+                      {plan.currency} {plan.amount} / {plan.duration}
+                    </Card.Title>
+                    <p>{plan.description}</p>
+                    <div className="mt-5">
+                      <ul className="flex flex-col space-y-2">
+                        {plan.benefits.map(
+                          (benefit: string, itemIndex: number) => {
+                            return (
+                              <li
+                                key={`plan-${index}-benefit-${itemIndex}`}
+                                className="flex items-center"
+                              >
+                                <CheckIcon className="h-5 w-5" />
+                                <span className="ml-1">{benefit}</span>
+                              </li>
+                            );
+                          }
+                        )}
+                      </ul>
+                    </div>
+                  </Card.Body>
+                  <Card.Actions className="justify-center m-2">
+                    <Button
+                      color="primary"
+                      className="md:w-full w-3/4 rounded-md"
+                      size="md"
+                    >
+                      {t('buy-now')}
+                    </Button>
+                  </Card.Actions>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
 
-                        <CardContent className="space-y-4">
-                            <hr className="border-dashed" />
-
-                            <ul className="list-outside space-y-3 text-sm">
-                                {['Basic Analytics Dashboard', '5GB Cloud Storage', 'Email and Chat Support'].map((item, index) => (
-                                    <li key={index} className="flex items-center gap-2">
-                                        <Check className="size-3" />
-                                        {item}
-                                    </li>
-                                ))}
-                            </ul>
-                        </CardContent>
-
-                        <CardFooter className="mt-auto">
-                            <Button asChild variant="outline" className="w-full">
-                                <Link href="">Get Started</Link>
-                            </Button>
-                        </CardFooter>
-                    </Card>
-
-                    <Card className="relative">
-                        <span className="bg-linear-to-br/increasing absolute inset-x-0 -top-3 mx-auto flex h-6 w-fit items-center rounded-full from-purple-400 to-amber-300 px-3 py-1 text-xs font-medium text-amber-950 ring-1 ring-inset ring-white/20 ring-offset-1 ring-offset-gray-950/5">Popular</span>
-
-                        <div className="flex flex-col">
-                            <CardHeader>
-                                <CardTitle className="font-medium">Pro</CardTitle>
-                                <span className="my-3 block text-2xl font-semibold">$19 / mo</span>
-                                <CardDescription className="text-sm">Per editor</CardDescription>
-                            </CardHeader>
-
-                            <CardContent className="space-y-4">
-                                <hr className="border-dashed" />
-                                <ul className="list-outside space-y-3 text-sm">
-                                    {['Everything in Free Plan', '5GB Cloud Storage', 'Email and Chat Support', 'Access to Community Forum', 'Single User Access', 'Access to Basic Templates', 'Mobile App Access', '1 Custom Report Per Month', 'Monthly Product Updates', 'Standard Security Features'].map((item, index) => (
-                                        <li key={index} className="flex items-center gap-2">
-                                            <Check className="size-3" />
-                                            {item}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </CardContent>
-
-                            <CardFooter>
-                                <Button asChild className="w-full">
-                                    <Link href="">Get Started</Link>
-                                </Button>
-                            </CardFooter>
-                        </div>
-                    </Card>
-
-                    <Card className="flex flex-col">
-                        <CardHeader>
-                            <CardTitle className="font-medium">Startup</CardTitle>
-                            <span className="my-3 block text-2xl font-semibold">$29 / mo</span>
-                            <CardDescription className="text-sm">Per editor</CardDescription>
-                        </CardHeader>
-
-                        <CardContent className="space-y-4">
-                            <hr className="border-dashed" />
-
-                            <ul className="list-outside space-y-3 text-sm">
-                                {['Everything in Pro Plan', '5GB Cloud Storage', 'Email and Chat Support'].map((item, index) => (
-                                    <li key={index} className="flex items-center gap-2">
-                                        <Check className="size-3" />
-                                        {item}
-                                    </li>
-                                ))}
-                            </ul>
-                        </CardContent>
-
-                        <CardFooter className="mt-auto">
-                            <Button asChild variant="outline" className="w-full">
-                                <Link href="">Get Started</Link>
-                            </Button>
-                        </CardFooter>
-                    </Card>
-                </div>
-            </div>
-        </section>
-    )
-}
+export default PricingSection;
