@@ -9,12 +9,16 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { type ReactElement, useState } from 'react';
-import { Button } from 'react-daisyui';
 import { toast } from 'react-hot-toast';
 import type { NextPageWithLayout } from 'types';
 import * as Yup from 'yup';
 import Head from 'next/head';
 import { maxLengthPolicies } from '@/lib/common';
+import { Button } from '@/lib/components/ui/button';
+import { Card, CardContent } from '@/lib/components/ui/card';
+import { Input } from '@/lib/components/ui/input';
+import { Label } from '@/lib/components/ui/label';
+import { Separator } from '@/lib/components/ui/separator';
 
 const SSO: NextPageWithLayout<
   InferGetServerSidePropsType<typeof getServerSideProps>
@@ -81,53 +85,62 @@ const SSO: NextPageWithLayout<
       <Head>
         <title>{t('signin-with-saml-sso')}</title>
       </Head>
-      <div className="rounded p-6 border">
-        <form onSubmit={formik.handleSubmit}>
-          <div className="space-y-2">
+      <Card>
+        <CardContent className="p-6">
+          <form onSubmit={formik.handleSubmit} className="space-y-4">
             {useEmail ? (
-              <InputWithLabel
-                type="email"
-                label="Email"
-                name="email"
-                placeholder="user@boxyhq.com"
-                value={formik.values.email}
-                error={formik.touched.email ? formik.errors.email : undefined}
-                onChange={formik.handleChange}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="email">{t('email')}</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  name="email"
+                  placeholder="user@boxyhq.com"
+                  value={formik.values.email}
+                  onChange={formik.handleChange}
+                  className={formik.touched.email && formik.errors.email ? "border-destructive" : ""}
+                />
+                {formik.touched.email && formik.errors.email && (
+                  <p className="text-xs text-destructive">{formik.errors.email}</p>
+                )}
+              </div>
             ) : (
-              <InputWithLabel
-                type="text"
-                label="Team slug"
-                name="slug"
-                placeholder="boxyhq"
-                value={formik.values.slug}
-                descriptionText="Contact your administrator to get your team slug"
-                error={formik.touched.slug ? formik.errors.slug : undefined}
-                onChange={formik.handleChange}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="slug">{t('team-slug')}</Label>
+                <Input
+                  id="slug"
+                  type="text"
+                  name="slug"
+                  placeholder="boxyhq"
+                  value={formik.values.slug}
+                  onChange={formik.handleChange}
+                  className={formik.touched.slug && formik.errors.slug ? "border-destructive" : ""}
+                />
+                {formik.touched.slug && formik.errors.slug && (
+                  <p className="text-xs text-destructive">{formik.errors.slug}</p>
+                )}
+                <p className="text-xs text-muted-foreground">{t('contact-admin-for-slug')}</p>
+              </div>
             )}
             <Button
               type="submit"
-              color="primary"
-              loading={formik.isSubmitting}
-              active={formik.dirty}
-              fullWidth
-              size="md"
+              className="w-full"
+              disabled={formik.isSubmitting || !formik.dirty}
             >
               {t('continue-with-saml-sso')}
             </Button>
+          </form>
+          <Separator className="my-6" />
+          <div className="flex flex-col space-y-3">
+            <Button asChild variant="outline" className="w-full">
+              <Link href="/auth/login">{t('sign-in-with-password')}</Link>
+            </Button>
+            <Button asChild variant="outline" className="w-full">
+              <Link href="/auth/magic-link">{t('sign-in-with-email')}</Link>
+            </Button>
           </div>
-        </form>
-        <div className="divider"></div>
-        <div className="space-y-3">
-          <Link href="/auth/login" className="btn btn-outline w-full">
-            {t('sign-in-with-password')}
-          </Link>
-          <Link href="/auth/magic-link" className="btn btn-outline w-full">
-            {t('sign-in-with-email')}
-          </Link>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </>
   );
 };

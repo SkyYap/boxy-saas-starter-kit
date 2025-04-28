@@ -3,34 +3,61 @@ import type {
   InferGetServerSidePropsType,
 } from 'next';
 
-import * as Yup from 'yup';
+import * as z from 'zod';
 import Link from 'next/link';
-import { useFormik } from 'formik';
-import { Button } from 'react-daisyui';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import React, { type ReactElement, useEffect, useState, useRef } from 'react';
-import type { ComponentStatus } from 'react-daisyui/dist/types';
 import { getCsrfToken, signIn, useSession } from 'next-auth/react';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { EyeIcon, EyeOffIcon } from 'lucide-react';
 
 import env from '@/lib/env';
 import type { NextPageWithLayout } from 'types';
 import { AuthLayout } from '@/components/layouts';
 import GithubButton from '@/components/auth/GithubButton';
 import GoogleButton from '@/components/auth/GoogleButton';
-import { Alert, InputWithLabel, Loading } from '@/components/shared';
+import { Loading } from '@/components/shared';
 import { authProviderEnabled } from '@/lib/auth';
 import Head from 'next/head';
-import TogglePasswordVisibility from '@/components/shared/TogglePasswordVisibility';
 import AgreeMessage from '@/components/auth/AgreeMessage';
 import GoogleReCAPTCHA from '@/components/shared/GoogleReCAPTCHA';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { maxLengthPolicies } from '@/lib/common';
+import { cn } from '@/lib/utils';
+
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/lib/components/ui/form';
+import { Input } from '@/lib/components/ui/input';
+import { Button } from '@/lib/components/ui/button';
+import { Separator } from '@/lib/components/ui/separator';
+import { Card, CardContent } from '@/lib/components/ui/card';
+import { Alert, AlertDescription } from '@/lib/components/ui/alert';
+
+const formSchema = z.object({
+  email: z
+    .string()
+    .email()
+    .max(maxLengthPolicies.email),
+  password: z
+    .string()
+    .min(1, { message: "Password is required" })
+    .max(maxLengthPolicies.password),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 interface Message {
   text: string | null;
-  status: ComponentStatus | null;
+  status: 'error' | 'success' | null;
 }
 
 const Login: NextPageWithLayout<
@@ -50,10 +77,6 @@ const Login: NextPageWithLayout<
     token: string;
   };
 
-  const handlePasswordVisibility = () => {
-    setIsPasswordVisible((prev) => !prev);
-  };
-
   useEffect(() => {
     if (error) {
       setMessage({ text: error, status: 'error' });
@@ -68,38 +91,36 @@ const Login: NextPageWithLayout<
     ? `/invitations/${token}`
     : env.redirectIfAuthenticated;
 
-  const formik = useFormik({
-    initialValues: {
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
       email: '',
       password: '',
     },
-    validationSchema: Yup.object().shape({
-      email: Yup.string().required().email().max(maxLengthPolicies.email),
-      password: Yup.string().required().max(maxLengthPolicies.password),
-    }),
-    onSubmit: async (values) => {
-      const { email, password } = values;
-
-      setMessage({ text: null, status: null });
-
-      const response = await signIn('credentials', {
-        email,
-        password,
-        csrfToken,
-        redirect: false,
-        callbackUrl: redirectUrl,
-        recaptchaToken,
-      });
-
-      formik.resetForm();
-      recaptchaRef.current?.reset();
-
-      if (response && !response.ok) {
-        setMessage({ text: response.error, status: 'error' });
-        return;
-      }
-    },
   });
+
+  const onSubmit = async (values: FormValues) => {
+    const { email, password } = values;
+
+    setMessage({ text: null, status: null });
+
+    const response = await signIn('credentials', {
+      email,
+      password,
+      csrfToken,
+      redirect: false,
+      callbackUrl: redirectUrl,
+      recaptchaToken,
+    });
+
+    form.reset();
+    recaptchaRef.current?.reset();
+
+    if (response && !response.ok) {
+      setMessage({ text: response.error, status: 'error' });
+      return;
+    }
+  };
 
   if (status === 'loading') {
     return <Loading />;
@@ -117,110 +138,130 @@ const Login: NextPageWithLayout<
         <title>{t('login-title')}</title>
       </Head>
       {message.text && message.status && (
-        <Alert status={message.status} className="mb-5">
-          {t(message.text)}
+        <Alert variant={message.status === 'error' ? 'destructive' : 'default'} className="mb-5">
+          <AlertDescription>{t(message.text)}</AlertDescription>
         </Alert>
       )}
-      <div className="rounded p-6 border">
-        <div className="flex gap-2 flex-wrap">
-          {authProviders.github && <GithubButton />}
-          {authProviders.google && <GoogleButton />}
-        </div>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex gap-2 flex-wrap">
+            {authProviders.github && <GithubButton />}
+            {authProviders.google && <GoogleButton />}
+          </div>
 
-        {(authProviders.github || authProviders.google) &&
-          authProviders.credentials && <div className="divider">{t('or')}</div>}
+          {(authProviders.github || authProviders.google) &&
+            authProviders.credentials && (
+              <div className="relative my-4">
+                <Separator className="my-4" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="bg-card px-2 text-muted-foreground text-sm">
+                    {t('or')}
+                  </span>
+                </div>
+              </div>
+            )}
 
-        {authProviders.credentials && (
-          <form onSubmit={formik.handleSubmit}>
-            <div className="space-y-3">
-              <InputWithLabel
-                type="email"
-                label="Email"
-                name="email"
-                placeholder={t('email')}
-                value={formik.values.email}
-                error={formik.touched.email ? formik.errors.email : undefined}
-                onChange={formik.handleChange}
-              />
-              <div className="relative flex">
-                <InputWithLabel
-                  type={isPasswordVisible ? 'text' : 'password'}
+          {authProviders.credentials && (
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('email')}</FormLabel>
+                      <FormControl>
+                        <Input type="email" placeholder={t('email')} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
                   name="password"
-                  placeholder={t('password')}
-                  value={formik.values.password}
-                  label={
-                    <label className="label">
-                      <span className="label-text">{t('password')}</span>
-                      <span className="label-text-alt">
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex justify-between items-center">
+                        <FormLabel>{t('password')}</FormLabel>
                         <Link
                           href="/auth/forgot-password"
-                          className="text-sm text-primary hover:text-[color-mix(in_oklab,oklch(var(--p)),black_7%)]"
+                          className="text-xs text-primary hover:text-primary/90"
                         >
                           {t('forgot-password')}
                         </Link>
-                      </span>
-                    </label>
-                  }
-                  error={
-                    formik.touched.password ? formik.errors.password : undefined
-                  }
-                  onChange={formik.handleChange}
+                      </div>
+                      <FormControl>
+                        <div className="relative">
+                          <Input 
+                            type={isPasswordVisible ? 'text' : 'password'}
+                            placeholder={t('password')} 
+                            {...field} 
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setIsPasswordVisible(prev => !prev)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2"
+                          >
+                            {isPasswordVisible ? (
+                              <EyeOffIcon className="h-4 w-4 text-muted-foreground" />
+                            ) : (
+                              <EyeIcon className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </button>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                <TogglePasswordVisibility
-                  isPasswordVisible={isPasswordVisible}
-                  handlePasswordVisibility={handlePasswordVisibility}
+                <GoogleReCAPTCHA
+                  recaptchaRef={recaptchaRef}
+                  onChange={setRecaptchaToken}
+                  siteKey={recaptchaSiteKey}
                 />
-              </div>
-              <GoogleReCAPTCHA
-                recaptchaRef={recaptchaRef}
-                onChange={setRecaptchaToken}
-                siteKey={recaptchaSiteKey}
-              />
-            </div>
-            <div className="mt-3 space-y-3">
-              <Button
-                type="submit"
-                color="primary"
-                loading={formik.isSubmitting}
-                active={formik.dirty}
-                fullWidth
-                size="md"
-              >
-                {t('sign-in')}
-              </Button>
-              <AgreeMessage text={t('sign-in')} />
-            </div>
-          </form>
-        )}
-
-        {(authProviders.email || authProviders.saml) && (
-          <div className="divider"></div>
-        )}
-
-        <div className="space-y-3">
-          {authProviders.email && (
-            <Link
-              href={`/auth/magic-link${params}`}
-              className="btn btn-outline w-full"
-            >
-              &nbsp;{t('sign-in-with-email')}
-            </Link>
+                <Button 
+                  type="submit" 
+                  className="w-full"
+                  disabled={form.formState.isSubmitting}
+                >
+                  {t('sign-in')}
+                </Button>
+                <AgreeMessage text={t('sign-in')} />
+              </form>
+            </Form>
           )}
 
-          {authProviders.saml && (
-            <Link href="/auth/sso" className="btn btn-outline w-full">
-              &nbsp;{t('continue-with-saml-sso')}
-            </Link>
+          {(authProviders.email || authProviders.saml) && (
+            <Separator className="my-4" />
           )}
-        </div>
-      </div>
-      <p className="text-center text-sm text-gray-600 mt-3">
-        {t('dont-have-an-account')}
+
+          <div className="space-y-3 mt-3">
+            {authProviders.email && (
+              <Link href={`/auth/magic-link${params}`} passHref>
+                <Button variant="outline" className="w-full">
+                  {t('sign-in-with-email')}
+                </Button>
+              </Link>
+            )}
+
+            {authProviders.saml && (
+              <Link href="/auth/sso" passHref>
+                <Button variant="outline" className="w-full">
+                  {t('continue-with-saml-sso')}
+                </Button>
+              </Link>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+      <p className="text-center text-sm text-muted-foreground mt-3">
+        {t('dont-have-an-account')}{' '}
         <Link
           href={`/auth/join${params}`}
-          className="font-medium text-primary hover:text-[color-mix(in_oklab,oklch(var(--p)),black_7%)]"
+          className="font-medium text-primary hover:text-primary/90"
         >
-          &nbsp;{t('create-a-free-account')}
+          {t('create-a-free-account')}
         </Link>
       </p>
     </>

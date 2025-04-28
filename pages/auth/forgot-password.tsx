@@ -1,7 +1,5 @@
 import { AuthLayout } from '@/components/layouts';
-import { InputWithLabel } from '@/components/shared';
 import { defaultHeaders, maxLengthPolicies } from '@/lib/common';
-import { useFormik } from 'formik';
 import type {
   GetServerSidePropsContext,
   InferGetServerSidePropsType,
@@ -11,13 +9,32 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRef, type ReactElement, useState } from 'react';
-import { Button } from 'react-daisyui';
 import toast from 'react-hot-toast';
 import type { ApiResponse, NextPageWithLayout } from 'types';
-import * as Yup from 'yup';
 import GoogleReCAPTCHA from '@/components/shared/GoogleReCAPTCHA';
 import ReCAPTCHA from 'react-google-recaptcha';
 import env from '@/lib/env';
+import * as z from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/lib/components/ui/form';
+import { Input } from '@/lib/components/ui/input';
+import { Button } from '@/lib/components/ui/button';
+import { Card, CardContent } from '@/lib/components/ui/card';
+
+const formSchema = z.object({
+  email: z.string().email({ message: "Valid email is required" }).max(maxLengthPolicies.email),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 const ForgotPassword: NextPageWithLayout<
   InferGetServerSidePropsType<typeof getServerSideProps>
@@ -26,81 +43,83 @@ const ForgotPassword: NextPageWithLayout<
   const recaptchaRef = useRef<ReCAPTCHA>(null);
   const [recaptchaToken, setRecaptchaToken] = useState<string>('');
 
-  const formik = useFormik({
-    initialValues: {
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
       email: '',
     },
-    validationSchema: Yup.object().shape({
-      email: Yup.string().required().email().max(maxLengthPolicies.email),
-    }),
-    onSubmit: async (values) => {
-      const response = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: defaultHeaders,
-        body: JSON.stringify({
-          ...values,
-          recaptchaToken,
-        }),
-      });
-
-      const json = (await response.json()) as ApiResponse;
-
-      formik.resetForm();
-      recaptchaRef.current?.reset();
-
-      if (!response.ok) {
-        toast.error(json.error.message);
-        return;
-      }
-
-      toast.success(t('password-reset-link-sent'));
-    },
   });
+
+  const onSubmit = async (values: FormValues) => {
+    const response = await fetch('/api/auth/forgot-password', {
+      method: 'POST',
+      headers: defaultHeaders,
+      body: JSON.stringify({
+        ...values,
+        recaptchaToken,
+      }),
+    });
+
+    const json = (await response.json()) as ApiResponse;
+
+    form.reset();
+    recaptchaRef.current?.reset();
+
+    if (!response.ok) {
+      toast.error(json.error.message);
+      return;
+    }
+
+    toast.success(t('password-reset-link-sent'));
+  };
 
   return (
     <>
       <Head>
         <title>{t('forgot-password-title')}</title>
       </Head>
-      <div className="rounded p-6 border">
-        <form onSubmit={formik.handleSubmit}>
-          <div className="space-y-2">
-            <InputWithLabel
-              type="email"
-              label="Email"
-              name="email"
-              placeholder="Email"
-              value={formik.values.email}
-              error={formik.touched.email ? formik.errors.email : undefined}
-              onChange={formik.handleChange}
-            />
-            <GoogleReCAPTCHA
-              recaptchaRef={recaptchaRef}
-              onChange={setRecaptchaToken}
-              siteKey={recaptchaSiteKey}
-            />
-          </div>
-          <div className="mt-4">
-            <Button
-              type="submit"
-              color="primary"
-              loading={formik.isSubmitting}
-              active={formik.dirty}
-              fullWidth
-              size="md"
-            >
-              {t('email-password-reset-link')}
-            </Button>
-          </div>
-        </form>
-      </div>
-      <p className="text-center text-sm text-gray-600 mt-3">
-        {t('already-have-an-account')}
+      <Card>
+        <CardContent className="pt-6">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('email')}</FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder="Email" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <GoogleReCAPTCHA
+                recaptchaRef={recaptchaRef}
+                onChange={setRecaptchaToken}
+                siteKey={recaptchaSiteKey || ''}
+              />
+              
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={form.formState.isSubmitting}
+              >
+                {t('email-password-reset-link')}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+      <p className="text-center text-sm text-muted-foreground mt-3">
+        {t('already-have-an-account')}{' '}
         <Link
           href="/auth/login"
-          className="font-medium text-primary hover:text-[color-mix(in_oklab,oklch(var(--p)),black_7%)]"
+          className="font-medium text-primary hover:text-primary/90"
         >
-          &nbsp;{t('sign-in')}
+          {t('sign-in')}
         </Link>
       </p>
     </>

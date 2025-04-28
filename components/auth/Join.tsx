@@ -1,32 +1,45 @@
-import { useState, useRef } from 'react';
-import { InputWithLabel } from '@/components/shared';
+import { useRef, useState } from 'react';
 import { defaultHeaders, passwordPolicies } from '@/lib/common';
-import { useFormik } from 'formik';
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
-import { Button } from 'react-daisyui';
 import toast from 'react-hot-toast';
 import type { ApiResponse } from 'types';
-import * as Yup from 'yup';
-import TogglePasswordVisibility from '../shared/TogglePasswordVisibility';
-import AgreeMessage from './AgreeMessage';
 import GoogleReCAPTCHA from '../shared/GoogleReCAPTCHA';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { maxLengthPolicies } from '@/lib/common';
+import * as z from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { EyeIcon, EyeOffIcon } from 'lucide-react';
+
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/lib/components/ui/form';
+import { Input } from '@/lib/components/ui/input';
+import { Button } from '@/lib/components/ui/button';
+import AgreeMessage from './AgreeMessage';
+
+const formSchema = z.object({
+  name: z.string().min(1, { message: "Name is required" }).max(maxLengthPolicies.name),
+  email: z.string().email().max(maxLengthPolicies.email),
+  password: z.string()
+    .min(passwordPolicies.minLength, { 
+      message: `Password must be at least ${passwordPolicies.minLength} characters` 
+    })
+    .max(maxLengthPolicies.password),
+  team: z.string().min(3, { message: "Team name must be at least 3 characters" }).max(maxLengthPolicies.team),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 interface JoinProps {
   recaptchaSiteKey: string | null;
 }
-
-const JoinUserSchema = Yup.object().shape({
-  name: Yup.string().required().max(maxLengthPolicies.name),
-  email: Yup.string().required().email().max(maxLengthPolicies.email),
-  password: Yup.string()
-    .required()
-    .min(passwordPolicies.minLength)
-    .max(maxLengthPolicies.password),
-  team: Yup.string().required().min(3).max(maxLengthPolicies.team),
-});
 
 const Join = ({ recaptchaSiteKey }: JoinProps) => {
   const router = useRouter();
@@ -35,117 +48,140 @@ const Join = ({ recaptchaSiteKey }: JoinProps) => {
   const [recaptchaToken, setRecaptchaToken] = useState<string>('');
   const recaptchaRef = useRef<ReCAPTCHA>(null);
 
-  const handlePasswordVisibility = () => {
-    setIsPasswordVisible((prev) => !prev);
-  };
-
-  const formik = useFormik({
-    initialValues: {
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
       name: '',
       email: '',
       password: '',
       team: '',
     },
-    validationSchema: JoinUserSchema,
-    validateOnChange: false,
-    validateOnBlur: false,
-    onSubmit: async (values) => {
-      const response = await fetch('/api/auth/join', {
-        method: 'POST',
-        headers: defaultHeaders,
-        body: JSON.stringify({
-          ...values,
-          recaptchaToken,
-        }),
-      });
-
-      const json = (await response.json()) as ApiResponse<{
-        confirmEmail: boolean;
-      }>;
-
-      recaptchaRef.current?.reset();
-
-      if (!response.ok) {
-        toast.error(json.error.message);
-        return;
-      }
-
-      formik.resetForm();
-
-      if (json.data.confirmEmail) {
-        router.push('/auth/verify-email');
-      } else {
-        toast.success(t('successfully-joined'));
-        router.push('/auth/login');
-      }
-    },
   });
 
+  const onSubmit = async (values: FormValues) => {
+    const response = await fetch('/api/auth/join', {
+      method: 'POST',
+      headers: defaultHeaders,
+      body: JSON.stringify({
+        ...values,
+        recaptchaToken,
+      }),
+    });
+
+    const json = (await response.json()) as ApiResponse<{
+      confirmEmail: boolean;
+    }>;
+
+    recaptchaRef.current?.reset();
+
+    if (!response.ok) {
+      toast.error(json.error.message);
+      return;
+    }
+
+    form.reset();
+
+    if (json.data.confirmEmail) {
+      router.push('/auth/verify-email');
+    } else {
+      toast.success(t('successfully-joined'));
+      router.push('/auth/login');
+    }
+  };
+
   return (
-    <form onSubmit={formik.handleSubmit}>
-      <div className="space-y-1">
-        <InputWithLabel
-          type="text"
-          label={t('name')}
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
           name="name"
-          placeholder={t('your-name')}
-          value={formik.values.name}
-          error={formik.touched.name ? formik.errors.name : undefined}
-          onChange={formik.handleChange}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('name')}</FormLabel>
+              <FormControl>
+                <Input placeholder={t('your-name')} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        <InputWithLabel
-          type="text"
-          label={t('team')}
+        
+        <FormField
+          control={form.control}
           name="team"
-          placeholder={t('team-name')}
-          value={formik.values.team}
-          error={formik.errors.team}
-          onChange={formik.handleChange}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('team')}</FormLabel>
+              <FormControl>
+                <Input placeholder={t('team-name')} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        <InputWithLabel
-          type="email"
-          label={t('email')}
+        
+        <FormField
+          control={form.control}
           name="email"
-          placeholder={t('email-placeholder')}
-          value={formik.values.email}
-          error={formik.errors.email}
-          onChange={formik.handleChange}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('email')}</FormLabel>
+              <FormControl>
+                <Input type="email" placeholder={t('email-placeholder')} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        <div className="relative flex">
-          <InputWithLabel
-            type={isPasswordVisible ? 'text' : 'password'}
-            label={t('password')}
-            name="password"
-            placeholder={t('password')}
-            value={formik.values.password}
-            error={formik.errors.password}
-            onChange={formik.handleChange}
-          />
-          <TogglePasswordVisibility
-            isPasswordVisible={isPasswordVisible}
-            handlePasswordVisibility={handlePasswordVisibility}
-          />
-        </div>
+        
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('password')}</FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <Input 
+                    type={isPasswordVisible ? 'text' : 'password'} 
+                    placeholder={t('password')} 
+                    {...field} 
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setIsPasswordVisible(prev => !prev)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2"
+                  >
+                    {isPasswordVisible ? (
+                      <EyeOffIcon className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <EyeIcon className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </button>
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <GoogleReCAPTCHA
           recaptchaRef={recaptchaRef}
           onChange={setRecaptchaToken}
           siteKey={recaptchaSiteKey}
         />
-      </div>
-      <div className="mt-3 space-y-3">
-        <Button
-          type="submit"
-          color="primary"
-          loading={formik.isSubmitting}
-          active={formik.dirty}
-          fullWidth
-          size="md"
+        
+        <Button 
+          type="submit" 
+          className="w-full" 
+          disabled={form.formState.isSubmitting}
         >
           {t('create-account')}
         </Button>
+        
         <AgreeMessage text={t('create-account')} />
-      </div>
-    </form>
+      </form>
+    </Form>
   );
 };
 

@@ -1,8 +1,8 @@
 import { signIn } from 'next-auth/react';
-import { Button } from 'react-daisyui';
 import { useTranslation } from 'next-i18next';
 import useInvitation from 'hooks/useInvitation';
 import env from '@/lib/env';
+import { Button } from '@/lib/components/ui/button';
 
 const GoogleButton = () => {
   const { t } = useTranslation('common');
@@ -14,16 +14,16 @@ const GoogleButton = () => {
 
   return (
     <Button
-      className="btn btn-outline w-full"
+      variant="outline"
+      className="w-full"
       onClick={() => {
         signIn('google', {
           callbackUrl,
         });
       }}
-      size="md"
     >
       <svg
-        className="mr-2 -ml-1 h-4 w-4"
+        className="mr-2 h-4 w-4"
         aria-hidden="true"
         focusable="false"
         data-prefix="fab"

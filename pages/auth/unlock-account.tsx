@@ -1,17 +1,19 @@
-import { Button } from 'react-daisyui';
 import type { GetServerSidePropsContext } from 'next';
 import { useState, type ReactElement, useEffect } from 'react';
-import type { ComponentStatus } from 'react-daisyui/dist/types';
 import { useTranslation } from 'next-i18next';
+
+import { AuthLayout } from '@/components/layouts';
+
+import { Button } from '@/lib/components/ui/button';
+import { Card, CardContent } from '@/lib/components/ui/card';
+import { Alert, AlertDescription } from '@/lib/components/ui/alert';
 
 import {
   deleteVerificationToken,
   getVerificationToken,
   isVerificationTokenExpired,
 } from 'models/verificationToken';
-import { Alert } from '@/components/shared';
 import { defaultHeaders } from '@/lib/common';
-import { AuthLayout } from '@/components/layouts';
 import { unlockAccount } from '@/lib/accountLock';
 import { getUser } from 'models/user';
 
@@ -24,7 +26,7 @@ interface UnlockAccountProps {
 
 interface Message {
   text: string | null;
-  status: ComponentStatus | null;
+  status: 'error' | 'success' | null;
 }
 
 const UnlockAccount = ({
@@ -78,22 +80,26 @@ const UnlockAccount = ({
   };
 
   return (
-    <div className="rounded p-6 border">
-      {message.text && message.status && (
-        <Alert status={message.status}>{message.text}</Alert>
-      )}
+    <Card>
+      <CardContent className="p-6">
+        {message.text && message.status && (
+          <Alert variant={message.status === 'error' ? 'destructive' : 'default'} className="mb-5">
+            <AlertDescription>{message.text}</AlertDescription>
+          </Alert>
+        )}
 
-      {displayResendLink && (
-        <Button
-          wide
-          className="mt-4 btn btn-outline w-full"
-          onClick={requestNewLink}
-          loading={loading}
-        >
-          {t('request-new-link')}
-        </Button>
-      )}
-    </div>
+        {displayResendLink && (
+          <Button
+            variant="outline"
+            className="mt-4 w-full"
+            onClick={requestNewLink}
+            disabled={loading}
+          >
+            {t('request-new-link')}
+          </Button>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

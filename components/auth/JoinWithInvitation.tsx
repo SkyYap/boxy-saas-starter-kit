@@ -1,6 +1,5 @@
 import {
   Error,
-  InputWithLabel,
   Loading,
   WithLoadingAndError,
 } from '@/components/shared';
@@ -9,39 +8,55 @@ import {
   maxLengthPolicies,
   passwordPolicies,
 } from '@/lib/common';
-import { useFormik } from 'formik';
 import useInvitation from 'hooks/useInvitation';
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
-import { Button } from 'react-daisyui';
 import toast from 'react-hot-toast';
 import type { ApiResponse } from 'types';
-import * as Yup from 'yup';
-import TogglePasswordVisibility from '../shared/TogglePasswordVisibility';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import AgreeMessage from './AgreeMessage';
 import GoogleReCAPTCHA from '../shared/GoogleReCAPTCHA';
 import ReCAPTCHA from 'react-google-recaptcha';
+import * as z from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { EyeIcon, EyeOffIcon } from 'lucide-react';
+
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/lib/components/ui/form';
+import { Input } from '@/lib/components/ui/input';
+import { Button } from '@/lib/components/ui/button';
 
 interface JoinWithInvitationProps {
   inviteToken: string;
   recaptchaSiteKey: string | null;
 }
 
-const JoinUserSchema = Yup.object().shape({
-  name: Yup.string().required().max(maxLengthPolicies.name),
-  password: Yup.string()
-    .required()
-    .min(passwordPolicies.minLength)
-    .max(maxLengthPolicies.password),
-  sentViaEmail: Yup.boolean().required(),
-  email: Yup.string()
-    .max(maxLengthPolicies.email)
-    .when('sentViaEmail', {
-      is: false,
-      then: (schema) => schema.required().email().max(maxLengthPolicies.email),
-    }),
-});
+// Define schema outside component to avoid re-creation on renders
+const createFormSchema = (sentViaEmail: boolean) => 
+  z.object({
+    name: z.string().min(1, { message: "Name is required" }).max(maxLengthPolicies.name),
+    password: z.string()
+      .min(passwordPolicies.minLength, { 
+        message: `Password must be at least ${passwordPolicies.minLength} characters` 
+      })
+      .max(maxLengthPolicies.password),
+    email: sentViaEmail
+      ? z.string().optional()
+      : z.string().email({ message: "Valid email is required" }).max(maxLengthPolicies.email),
+  });
+
+type FormValues = {
+  name: string;
+  email?: string;
+  password: string;
+};
 
 const JoinWithInvitation = ({
   inviteToken,
@@ -54,46 +69,49 @@ const JoinWithInvitation = ({
   const [recaptchaToken, setRecaptchaToken] = useState<string>('');
   const recaptchaRef = useRef<ReCAPTCHA>(null);
 
-  const handlePasswordVisibility = () => {
-    setIsPasswordVisible((prev) => !prev);
-  };
-
-  const formik = useFormik({
-    initialValues: {
+  const formSchema = createFormSchema(invitation?.sentViaEmail || false);
+  
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
       name: '',
       email: '',
       password: '',
-      sentViaEmail: invitation?.sentViaEmail || true,
-    },
-    validationSchema: JoinUserSchema,
-    enableReinitialize: true,
-    validateOnChange: false,
-    validateOnBlur: false,
-    onSubmit: async (values) => {
-      const response = await fetch('/api/auth/join', {
-        method: 'POST',
-        headers: defaultHeaders,
-        body: JSON.stringify({
-          ...values,
-          recaptchaToken,
-          inviteToken,
-        }),
-      });
-
-      const json = (await response.json()) as ApiResponse;
-
-      recaptchaRef.current?.reset();
-
-      if (!response.ok) {
-        toast.error(json.error.message);
-        return;
-      }
-
-      formik.resetForm();
-      toast.success(t('successfully-joined'));
-      router.push(`/auth/login?token=${inviteToken}`);
-    },
+    }
   });
+  
+  // Update form values when invitation loads
+  useEffect(() => {
+    if (invitation && invitation.email) {
+      form.setValue('email', invitation.email);
+    }
+  }, [invitation, form]);
+
+  const onSubmit = async (values: FormValues) => {
+    const response = await fetch('/api/auth/join', {
+      method: 'POST',
+      headers: defaultHeaders,
+      body: JSON.stringify({
+        ...values,
+        recaptchaToken,
+        inviteToken,
+        sentViaEmail: invitation?.sentViaEmail || false,
+      }),
+    });
+
+    const json = (await response.json()) as ApiResponse;
+
+    recaptchaRef.current?.reset();
+
+    if (!response.ok) {
+      toast.error(json.error.message);
+      return;
+    }
+
+    form.reset();
+    toast.success(t('successfully-joined'));
+    router.push(`/auth/login?token=${inviteToken}`);
+  };
 
   if (isLoading) {
     return <Loading />;
@@ -105,70 +123,93 @@ const JoinWithInvitation = ({
 
   return (
     <WithLoadingAndError isLoading={isLoading} error={error}>
-      <form className="space-y-3" onSubmit={formik.handleSubmit}>
-        <InputWithLabel
-          type="text"
-          label={t('name')}
-          name="name"
-          placeholder={t('your-name')}
-          value={formik.values.name}
-          error={formik.errors.name}
-          onChange={formik.handleChange}
-        />
-
-        {invitation.sentViaEmail ? (
-          <InputWithLabel
-            type="email"
-            label={t('email')}
-            value={invitation.email!}
-            disabled
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('name')}</FormLabel>
+                <FormControl>
+                  <Input placeholder={t('your-name')} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        ) : (
-          <InputWithLabel
-            type="email"
-            label={t('email')}
-            name="email"
-            placeholder={t('email')}
-            value={formik.values.email}
-            error={formik.errors.email}
-            onChange={formik.handleChange}
-          />
-        )}
 
-        <div className="relative flex">
-          <InputWithLabel
-            type={isPasswordVisible ? 'text' : 'password'}
-            label={t('password')}
+          {invitation.sentViaEmail ? (
+            <FormItem>
+              <FormLabel>{t('email')}</FormLabel>
+              <FormControl>
+                <Input type="email" value={invitation.email || ''} disabled />
+              </FormControl>
+            </FormItem>
+          ) : (
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('email')}</FormLabel>
+                  <FormControl>
+                    <Input type="email" placeholder={t('email')} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          <FormField
+            control={form.control}
             name="password"
-            placeholder={t('password')}
-            value={formik.values.password}
-            error={formik.errors.password}
-            onChange={formik.handleChange}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('password')}</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Input 
+                      type={isPasswordVisible ? 'text' : 'password'} 
+                      placeholder={t('password')} 
+                      {...field} 
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setIsPasswordVisible(prev => !prev)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2"
+                    >
+                      {isPasswordVisible ? (
+                        <EyeOffIcon className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <EyeIcon className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </button>
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          <TogglePasswordVisibility
-            isPasswordVisible={isPasswordVisible}
-            handlePasswordVisibility={handlePasswordVisibility}
+
+          <GoogleReCAPTCHA
+            recaptchaRef={recaptchaRef}
+            onChange={setRecaptchaToken}
+            siteKey={recaptchaSiteKey || ''}
           />
-        </div>
-        <GoogleReCAPTCHA
-          recaptchaRef={recaptchaRef}
-          onChange={setRecaptchaToken}
-          siteKey={recaptchaSiteKey}
-        />
-        <div className="space-y-3">
-          <Button
-            type="submit"
-            color="primary"
-            loading={formik.isSubmitting}
-            active={formik.dirty}
-            fullWidth
-            size="md"
+          
+          <Button 
+            type="submit" 
+            className="w-full" 
+            disabled={form.formState.isSubmitting}
           >
             {t('create-account')}
           </Button>
+          
           <AgreeMessage text={t('create-account')} />
-        </div>
-      </form>
+        </form>
+      </Form>
     </WithLoadingAndError>
   );
 };
