@@ -12,6 +12,7 @@ import useTheme from 'hooks/useTheme';
 import env from '@/lib/env';
 import { useTranslation } from 'next-i18next';
 import { useCustomSignOut } from 'hooks/useCustomSignout';
+import { Button } from '@/lib/components/ui/button';
 
 interface HeaderProps {
   setSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -22,6 +23,22 @@ const Header = ({ setSidebarOpen }: HeaderProps) => {
   const { status, data } = useSession();
   const { t } = useTranslation('common');
   const signOut = useCustomSignOut();
+  const [isOpen, setIsOpen] = React.useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   if (status === 'loading' || !data) {
     return null;
@@ -42,69 +59,60 @@ const Header = ({ setSidebarOpen }: HeaderProps) => {
       <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
         <div className="relative flex flex-1"></div>
         <div className="flex items-center gap-x-4 lg:gap-x-6">
-          <div className="dropdown dropdown-end">
-            <div className="flex items-center cursor-pointer" tabIndex={0}>
+          <div className="relative" ref={dropdownRef}>
+            <Button
+              variant="ghost"
+              className="flex items-center gap-2 p-0 hover:bg-transparent"
+              onClick={() => setIsOpen(!isOpen)}
+            >
               <span className="hidden lg:flex lg:items-center">
-                <button
-                  className="ml-4 text-sm font-semibold leading-6 text-gray-900 dark:text-gray-50"
-                  aria-hidden="true"
-                >
+                <span className="text-sm font-semibold leading-6 text-gray-900 dark:text-gray-50">
                   {user.name}
-                </button>
+                </span>
                 <ChevronDownIcon
                   className="ml-2 h-5 w-5 text-gray-400"
                   aria-hidden="true"
                 />
               </span>
-            </div>
-            <ul
-              tabIndex={0}
-              className="dropdown-content z-1 menu p-2 shadow-sm bg-base-100 border rounded w-40 space-y-1"
-            >
-              <li
-                onClick={() => {
-                  if (document.activeElement) {
-                    (document.activeElement as HTMLElement).blur();
-                  }
-                }}
-              >
-                <Link
-                  href="/settings/account"
-                  className="block px-2 py-1 text-sm leading-6 text-gray-900 dark:text-gray-50 cursor-pointer"
-                >
-                  <div className="flex items-center">
-                    <UserCircleIcon className="w-5 h-5 mr-1" /> {t('account')}
-                  </div>
-                </Link>
-              </li>
+            </Button>
 
-              {env.darkModeEnabled && (
-                <li>
-                  <button
-                    className="block px-2 py-1 text-sm leading-6 text-gray-900 dark:text-gray-50 cursor-pointer"
-                    type="button"
-                    onClick={toggleTheme}
+            {isOpen && (
+              <div className="absolute right-0 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-md z-10 p-1 space-y-1 dark:bg-gray-800 dark:border-gray-700">
+                <Link href="/settings/account">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-sm font-medium text-gray-900 dark:text-gray-50"
+                    onClick={() => setIsOpen(false)}
                   >
-                    <div className="flex items-center">
-                      <SunIcon className="w-5 h-5 mr-1" /> {t('switch-theme')}
-                    </div>
-                  </button>
-                </li>
-              )}
+                    <UserCircleIcon className="w-5 h-5 mr-2" /> {t('account')}
+                  </Button>
+                </Link>
 
-              <li>
-                <button
-                  className="block px-2 py-1 text-sm leading-6 text-gray-900 dark:text-gray-50 cursor-pointer"
-                  type="button"
-                  onClick={signOut}
+                {env.darkModeEnabled && (
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-sm font-medium text-gray-900 dark:text-gray-50"
+                    onClick={() => {
+                      toggleTheme();
+                      setIsOpen(false);
+                    }}
+                  >
+                    <SunIcon className="w-5 h-5 mr-2" /> {t('switch-theme')}
+                  </Button>
+                )}
+
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-sm font-medium text-gray-900 dark:text-gray-50"
+                  onClick={() => {
+                    signOut();
+                    setIsOpen(false);
+                  }}
                 >
-                  <div className="flex items-center">
-                    <ArrowRightOnRectangleIcon className="w-5 h-5 mr-1" />{' '}
-                    {t('logout')}
-                  </div>
-                </button>
-              </li>
-            </ul>
+                  <ArrowRightOnRectangleIcon className="w-5 h-5 mr-2" /> {t('logout')}
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
