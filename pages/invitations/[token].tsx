@@ -14,6 +14,7 @@ import EmailMismatch from '@/components/invitation/EmailMismatch';
 import AcceptInvitation from '@/components/invitation/AcceptInvitation';
 import NotAuthenticated from '@/components/invitation/NotAuthenticated';
 import EmailDomainMismatch from '@/components/invitation/EmailDomainMismatch';
+import { Card, CardContent } from '@/lib/components/ui/card';
 
 const AcceptTeamInvitation: NextPageWithLayout = () => {
   const { status, data } = useSession();
@@ -49,40 +50,42 @@ const AcceptTeamInvitation: NextPageWithLayout = () => {
       <Head>
         <title>{`${t('invitation-title')} ${invitation.team.name}`}</title>
       </Head>
-      <div className="rounded p-6 border">
-        <div className="flex flex-col items-center space-y-6">
-          <h2 className="font-bold">
-            {`${invitation.team.name} ${t('team-invite')}`}
-          </h2>
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex flex-col items-center space-y-6">
+            <h2 className="font-bold">
+              {`${invitation.team.name} ${t('team-invite')}`}
+            </h2>
 
-          {/* User not authenticated */}
-          {status === 'unauthenticated' && (
-            <NotAuthenticated invitation={invitation} />
-          )}
-
-          {/* User authenticated and email matches */}
-          {status === 'authenticated' && acceptInvite && (
-            <AcceptInvitation invitation={invitation} />
-          )}
-
-          {/* User authenticated and email does not match */}
-          {status === 'authenticated' &&
-            invitation.sentViaEmail &&
-            authUser?.email &&
-            !emailMatch && <EmailMismatch email={authUser.email} />}
-
-          {/* User authenticated and email domain doesn not match */}
-          {status === 'authenticated' &&
-            !invitation.sentViaEmail &&
-            invitation.allowedDomains.length > 0 &&
-            !emailDomainMatch && (
-              <EmailDomainMismatch
-                invitation={invitation}
-                emailDomain={emailDomain!}
-              />
+            {/* User not authenticated */}
+            {status === 'unauthenticated' && (
+              <NotAuthenticated invitation={invitation} />
             )}
-        </div>
-      </div>
+
+            {/* User authenticated and email matches */}
+            {status === 'authenticated' && acceptInvite && (
+              <AcceptInvitation invitation={invitation} />
+            )}
+
+            {/* User authenticated and email does not match */}
+            {status === 'authenticated' &&
+              invitation.sentViaEmail &&
+              authUser?.email &&
+              !emailMatch && <EmailMismatch email={authUser.email} />}
+
+            {/* User authenticated and email domain doesn not match */}
+            {status === 'authenticated' &&
+              !invitation.sentViaEmail &&
+              invitation.allowedDomains.length > 0 &&
+              !emailDomainMatch && (
+                <EmailDomainMismatch
+                  invitation={invitation}
+                  emailDomain={emailDomain!}
+                />
+              )}
+          </div>
+        </CardContent>
+      </Card>
     </>
   );
 };

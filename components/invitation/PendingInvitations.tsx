@@ -9,6 +9,7 @@ import type { ApiResponse } from 'types';
 import ConfirmationDialog from '../shared/ConfirmationDialog';
 import { TeamInvitation } from 'models/invitation';
 import { Table } from '@/components/shared/table/Table';
+import { Button } from '@/lib/components/ui/button';
 
 const PendingInvitations = ({ team }: { team: Team }) => {
   const [selectedInvitation, setSelectedInvitation] =
@@ -98,7 +99,7 @@ const PendingInvitations = ({ team }: { team: Team }) => {
               {
                 buttons: [
                   {
-                    color: 'error',
+                    color: 'destructive',
                     text: t('remove'),
                     onClick: () => {
                       setSelectedInvitation(invitation);

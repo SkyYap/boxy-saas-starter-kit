@@ -1,4 +1,4 @@
-import { Button } from 'react-daisyui';
+import { Button } from '@/lib/components/ui/button';
 import Badge from '@/components/shared/Badge';
 import { useTranslation } from 'next-i18next';
 
@@ -81,9 +81,8 @@ export const TableBody = ({
                         return (
                           <Button
                             key={row.id + '-button-' + index}
-                            size="xs"
-                            color={button.color}
-                            variant="outline"
+                            size="sm"
+                            variant={button.color === 'destructive' ? 'destructive' : 'outline'}
                             onClick={button.onClick}
                           >
                             {button.text}
@@ -103,7 +102,7 @@ export const TableBody = ({
                           >
                             <button
                               key={row.id + '-action-' + index}
-                              className={`py-2 ${action.destructive ? 'text-red-500 hover:text-red-900' : 'hover:text-green-400'}`}
+                              className={`py-2 ${action.destructive ? 'text-destructive hover:text-destructive/80' : 'hover:text-primary'}`}
                               onClick={action.onClick}
                             >
                               {action.icon}

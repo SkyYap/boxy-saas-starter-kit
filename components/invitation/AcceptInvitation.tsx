@@ -1,11 +1,11 @@
 import toast from 'react-hot-toast';
-import { Button } from 'react-daisyui';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 
 import type { ApiResponse } from 'types';
 import { defaultHeaders } from '@/lib/common';
 import { Invitation, Team } from '@prisma/client';
+import { Button } from '@/lib/components/ui/button';
 
 interface AcceptInvitationProps {
   invitation: Invitation & { team: Team };
@@ -37,7 +37,7 @@ const AcceptInvitation = ({ invitation }: AcceptInvitationProps) => {
   return (
     <>
       <h3 className="text-center">{t('accept-invite')}</h3>
-      <Button onClick={acceptInvitation} fullWidth color="primary" size="md">
+      <Button onClick={acceptInvitation} className="w-full">
         {t('accept-invitation')}
       </Button>
     </>

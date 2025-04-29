@@ -3,13 +3,15 @@ import * as Yup from 'yup';
 import { mutate } from 'swr';
 import { useFormik } from 'formik';
 import toast from 'react-hot-toast';
-import { Button, Input } from 'react-daisyui';
 import { useTranslation } from 'next-i18next';
 
 import type { ApiResponse } from 'types';
 import { defaultHeaders, maxLengthPolicies } from '@/lib/common';
 import { availableRoles } from '@/lib/permissions';
 import type { Team } from '@prisma/client';
+import { Button } from '@/lib/components/ui/button';
+import { Input } from '@/lib/components/ui/input';
+import { Label } from '@/lib/components/ui/label';
 
 interface InviteViaEmailProps {
   team: Team;
@@ -59,38 +61,47 @@ const InviteViaEmail = ({ setVisible, team }: InviteViaEmailProps) => {
   return (
     <form onSubmit={formik.handleSubmit} method="POST" className="pb-6">
       <h3 className="font-medium text-[14px] pb-2">{t('invite-via-email')}</h3>
-      <div className="flex gap-1">
-        <Input
-          name="email"
-          onChange={formik.handleChange}
-          value={formik.values.email}
-          placeholder="jackson@boxyhq.com"
-          required
-          className="text-sm w-1/2"
-          type="email"
-        />
-        <select
-          className="select-bordered select rounded"
-          name="role"
-          onChange={formik.handleChange}
-          value={formik.values.role}
-          required
-        >
-          {availableRoles.map((role) => (
-            <option value={role.id} key={role.id}>
-              {role.name}
-            </option>
-          ))}
-        </select>
-        <Button
-          type="submit"
-          color="primary"
-          loading={formik.isSubmitting}
-          disabled={!formik.isValid || !formik.dirty}
-          className="grow"
-        >
-          {t('send-invite')}
-        </Button>
+      <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-2">
+        <div className="w-full sm:w-1/2">
+          <Label htmlFor="email" className="sr-only">
+            {t('email')}
+          </Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            onChange={formik.handleChange}
+            value={formik.values.email}
+            placeholder="jackson@boxyhq.com"
+            required
+            className="w-full"
+          />
+        </div>
+        <div className="w-full sm:w-1/3">
+          <select
+            className="w-full h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm appearance-none"
+            name="role"
+            onChange={formik.handleChange}
+            value={formik.values.role}
+            required
+            style={{ minWidth: "100px" }}
+          >
+            {availableRoles.map((role) => (
+              <option value={role.id} key={role.id}>
+                {role.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="w-full sm:w-1/6">
+          <Button
+            type="submit"
+            disabled={!formik.isValid || !formik.dirty || formik.isSubmitting}
+            className="w-full"
+          >
+            {t('send-invite')}
+          </Button>
+        </div>
       </div>
     </form>
   );

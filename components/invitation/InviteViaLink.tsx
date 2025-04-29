@@ -3,7 +3,6 @@ import { mutate } from 'swr';
 import { useFormik } from 'formik';
 import toast from 'react-hot-toast';
 import React, { useState } from 'react';
-import { Button, Input } from 'react-daisyui';
 import { useTranslation } from 'next-i18next';
 
 import type { ApiResponse } from 'types';
@@ -12,6 +11,9 @@ import { availableRoles } from '@/lib/permissions';
 import type { Team } from '@prisma/client';
 import { defaultHeaders, isValidDomain, maxLengthPolicies } from '@/lib/common';
 import { InputWithCopyButton } from '../shared';
+import { Button } from '@/lib/components/ui/button';
+import { Input } from '@/lib/components/ui/input';
+import { Label } from '@/lib/components/ui/label';
 import ConfirmationDialog from '../shared/ConfirmationDialog';
 
 interface InviteViaLinkProps {
@@ -109,12 +111,14 @@ const InviteViaLink = ({ team }: InviteViaLinkProps) => {
             ? `Anyone with an email address ending with ${invitation.allowedDomains} can use this link to join your team.`
             : 'Anyone can use this link to join your team.'}
           <Button
-            className="btn btn-xs btn-link link-error"
+            variant="link"
+            className="text-destructive hover:text-destructive/80 p-0 h-auto text-xs"
             onClick={() => setShowDelDialog(true)}
           >
             {t('delete-link')}
           </Button>
         </p>
+
         <ConfirmationDialog
           visible={showDelDialog}
           onCancel={() => setShowDelDialog(false)}
@@ -130,36 +134,45 @@ const InviteViaLink = ({ team }: InviteViaLinkProps) => {
   return (
     <form onSubmit={formik.handleSubmit} method="POST" className="pt-4">
       <h3 className="font-medium text-[14px] pb-2">{t('invite-via-link')}</h3>
-      <div className="flex gap-1">
-        <Input
-          name="domains"
-          onChange={formik.handleChange}
-          value={formik.values.domains}
-          placeholder="Restrict domain: boxyhq.com"
-          className="text-sm w-1/2"
-        />
-        <select
-          className="select-bordered select rounded"
-          name="role"
-          onChange={formik.handleChange}
-          value={formik.values.role}
-          required
-        >
-          {availableRoles.map((role) => (
-            <option value={role.id} key={role.id}>
-              {role.name}
-            </option>
-          ))}
-        </select>
-        <Button
-          type="submit"
-          color="primary"
-          loading={formik.isSubmitting}
-          disabled={!formik.isValid}
-          className="grow"
-        >
-          {t('create-link')}
-        </Button>
+      <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-2">
+        <div className="w-full sm:w-1/2">
+          <Label htmlFor="domains" className="sr-only">
+            {t('domains')}
+          </Label>
+          <Input
+            id="domains"
+            name="domains"
+            onChange={formik.handleChange}
+            value={formik.values.domains}
+            placeholder="Restrict domain: boxyhq.com"
+            className="w-full"
+          />
+        </div>
+        <div className="w-full sm:w-1/3">
+          <select
+            className="w-full h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm appearance-none"
+            name="role"
+            onChange={formik.handleChange}
+            value={formik.values.role}
+            required
+            style={{ minWidth: "100px" }}
+          >
+            {availableRoles.map((role) => (
+              <option value={role.id} key={role.id}>
+                {role.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="w-full sm:w-1/6">
+          <Button
+            type="submit"
+            disabled={!formik.isValid || formik.isSubmitting}
+            className="w-full"
+          >
+            {t('create-link')}
+          </Button>
+        </div>
       </div>
       <p className="text-sm text-slate-500 my-2">
         {formik.values.domains && !formik.errors.domains
