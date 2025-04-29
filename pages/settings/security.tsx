@@ -12,7 +12,7 @@ type SecurityProps = InferGetServerSidePropsType<typeof getServerSideProps>;
 
 const Security = ({ sessionStrategy }: SecurityProps) => {
   return (
-    <div className="flex gap-10 flex-col">
+    <div className="flex flex-col space-y-6">
       <UpdatePassword />
       {sessionStrategy === 'database' && <ManageSessions />}
     </div>

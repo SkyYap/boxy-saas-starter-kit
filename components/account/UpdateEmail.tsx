@@ -1,13 +1,21 @@
 import { useFormik } from 'formik';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'next-i18next';
-import { Button, Input } from 'react-daisyui';
+import type { User } from '@prisma/client';
 
 import type { ApiResponse } from 'types';
-import { Card } from '@/components/shared';
 import { defaultHeaders } from '@/lib/common';
-import type { User } from '@prisma/client';
 import { updateAccountSchema } from '@/lib/zod';
+import { 
+  Card, 
+  CardHeader, 
+  CardTitle, 
+  CardDescription, 
+  CardContent, 
+  CardFooter 
+} from '@/lib/components/ui/card';
+import { Input } from '@/lib/components/ui/input';
+import { Button } from '@/lib/components/ui/button';
 
 interface UpdateEmailProps {
   user: Partial<User>;
@@ -50,13 +58,13 @@ const UpdateEmail = ({ user, allowEmailChange }: UpdateEmailProps) => {
   return (
     <form onSubmit={formik.handleSubmit}>
       <Card>
-        <Card.Body>
-          <Card.Header>
-            <Card.Title>{t('email-address')}</Card.Title>
-            <Card.Description>
-              {t('email-address-description')}
-            </Card.Description>
-          </Card.Header>
+        <CardHeader>
+          <CardTitle>{t('email-address')}</CardTitle>
+          <CardDescription>
+            {t('email-address-description')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
           <Input
             type="email"
             name="email"
@@ -67,18 +75,17 @@ const UpdateEmail = ({ user, allowEmailChange }: UpdateEmailProps) => {
             required
             disabled={!allowEmailChange}
           />
-        </Card.Body>
-        <Card.Footer>
+        </CardContent>
+        <CardFooter>
           <Button
             type="submit"
-            color="primary"
-            loading={formik.isSubmitting}
+            variant="default"
             disabled={!formik.dirty || !formik.isValid}
-            size="md"
+            className={formik.isSubmitting ? "opacity-70 pointer-events-none" : ""}
           >
-            {t('save-changes')}
+            {formik.isSubmitting ? t('saving') : t('save-changes')}
           </Button>
-        </Card.Footer>
+        </CardFooter>
       </Card>
     </form>
   );

@@ -1,15 +1,23 @@
 import { useFormik } from 'formik';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'next-i18next';
-import { Button, Input } from 'react-daisyui';
-
-import type { ApiResponse } from 'types';
-import { Card } from '@/components/shared';
-import { defaultHeaders } from '@/lib/common';
-import { User } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
+import { User } from '@prisma/client';
+
+import type { ApiResponse } from 'types';
+import { defaultHeaders } from '@/lib/common';
 import { updateAccountSchema } from '@/lib/zod';
+import { 
+  Card, 
+  CardHeader, 
+  CardTitle, 
+  CardDescription, 
+  CardContent, 
+  CardFooter 
+} from '@/lib/components/ui/card';
+import { Input } from '@/lib/components/ui/input';
+import { Button } from '@/lib/components/ui/button';
 
 const UpdateName = ({ user }: { user: Partial<User> }) => {
   const { t } = useTranslation('common');
@@ -54,11 +62,11 @@ const UpdateName = ({ user }: { user: Partial<User> }) => {
   return (
     <form onSubmit={formik.handleSubmit}>
       <Card>
-        <Card.Body>
-          <Card.Header>
-            <Card.Title>{t('name')}</Card.Title>
-            <Card.Description>{t('name-appearance')}</Card.Description>
-          </Card.Header>
+        <CardHeader>
+          <CardTitle>{t('name')}</CardTitle>
+          <CardDescription>{t('name-appearance')}</CardDescription>
+        </CardHeader>
+        <CardContent>
           <Input
             type="text"
             name="name"
@@ -68,18 +76,17 @@ const UpdateName = ({ user }: { user: Partial<User> }) => {
             className="w-full max-w-md"
             required
           />
-        </Card.Body>
-        <Card.Footer>
+        </CardContent>
+        <CardFooter>
           <Button
             type="submit"
-            color="primary"
-            loading={formik.isSubmitting}
+            variant="default"
             disabled={!formik.dirty || !formik.isValid}
-            size="md"
+            className={formik.isSubmitting ? "opacity-70 pointer-events-none" : ""}
           >
-            {t('save-changes')}
+            {formik.isSubmitting ? t('saving') : t('save-changes')}
           </Button>
-        </Card.Footer>
+        </CardFooter>
       </Card>
     </form>
   );

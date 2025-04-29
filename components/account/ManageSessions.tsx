@@ -9,6 +9,7 @@ import { Session } from '@prisma/client';
 import { WithLoadingAndError } from '@/components/shared';
 import ConfirmationDialog from '@/components/shared/ConfirmationDialog';
 import { Table } from '@/components/shared/table/Table';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/lib/components/ui/card';
 
 type NextAuthSession = Session & { isCurrent: boolean };
 
@@ -55,65 +56,62 @@ const ManageSessions = () => {
 
   return (
     <WithLoadingAndError isLoading={isLoading} error={error}>
-      <div className="space-y-3">
-        <div className="space-y-2">
-          <h2 className="text-xl font-medium leading-none tracking-tight">
-            {t('browser-sessions')}
-          </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            {t('manage-sessions')}
-          </p>
-        </div>
-
-        <Table
-          cols={[t('device'), t('actions')]}
-          body={sessions.map((session) => {
-            return {
-              id: session.id,
-              cells: [
-                {
-                  wrap: true,
-                  element: (
-                    <span className="items-center flex">
-                      <ComputerDesktopIcon className="w-6 h-6 inline-block mr-1 text-primary" />
-                      {session.isCurrent ? t('this-browser') : t('other')}
-                    </span>
-                  ),
-                },
-                {
-                  buttons: [
-                    {
-                      color: 'error',
-                      text: t('remove'),
-                      onClick: () => {
-                        setSessionToDelete(session);
-                        setAskConfirmation(true);
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('browser-sessions')}</CardTitle>
+          <CardDescription>{t('manage-sessions')}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table
+            cols={[t('device'), t('actions')]}
+            body={sessions.map((session) => {
+              return {
+                id: session.id,
+                cells: [
+                  {
+                    wrap: true,
+                    element: (
+                      <span className="items-center flex">
+                        <ComputerDesktopIcon className="w-6 h-6 inline-block mr-1 text-primary" />
+                        {session.isCurrent ? t('this-browser') : t('other')}
+                      </span>
+                    ),
+                  },
+                  {
+                    buttons: [
+                      {
+                        color: 'destructive',
+                        text: t('remove'),
+                        onClick: () => {
+                          setSessionToDelete(session);
+                          setAskConfirmation(true);
+                        },
                       },
-                    },
-                  ],
-                },
-              ],
-            };
-          })}
-        ></Table>
+                    ],
+                  },
+                ],
+              };
+            })}
+          />
+        </CardContent>
+      </Card>
 
-        {sessionToDelete && (
-          <ConfirmationDialog
-            visible={askConfirmation}
-            title={t('remove-browser-session')}
-            onCancel={() => {
-              setAskConfirmation(false);
-              setSessionToDelete(null);
-            }}
-            onConfirm={() => deleteSession(sessionToDelete.id)}
-            confirmText={t('remove')}
-          >
-            {sessionToDelete?.isCurrent
-              ? t('remove-current-browser-session-warning')
-              : t('remove-other-browser-session-warning')}
-          </ConfirmationDialog>
-        )}
-      </div>
+      {sessionToDelete && (
+        <ConfirmationDialog
+          visible={askConfirmation}
+          title={t('remove-browser-session')}
+          onCancel={() => {
+            setAskConfirmation(false);
+            setSessionToDelete(null);
+          }}
+          onConfirm={() => deleteSession(sessionToDelete.id)}
+          confirmText={t('remove')}
+        >
+          {sessionToDelete?.isCurrent
+            ? t('remove-current-browser-session-warning')
+            : t('remove-other-browser-session-warning')}
+        </ConfirmationDialog>
+      )}
     </WithLoadingAndError>
   );
 };

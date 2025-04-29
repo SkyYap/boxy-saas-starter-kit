@@ -1,13 +1,20 @@
 import toast from 'react-hot-toast';
-import { Button } from 'react-daisyui';
 import { useTranslation } from 'next-i18next';
 import React, { useState, useEffect, useCallback } from 'react';
 import { ArrowUpCircleIcon } from '@heroicons/react/24/outline';
+import type { User } from '@prisma/client';
 
 import type { ApiResponse } from 'types';
-import type { User } from '@prisma/client';
-import { Card } from '@/components/shared';
 import { defaultHeaders } from '@/lib/common';
+import { 
+  Card, 
+  CardHeader, 
+  CardTitle, 
+  CardDescription, 
+  CardContent, 
+  CardFooter 
+} from '@/lib/components/ui/card';
+import { Button } from '@/lib/components/ui/button';
 
 const UploadAvatar = ({ user }: { user: Partial<User> }) => {
   const { t } = useTranslation('common');
@@ -86,14 +93,14 @@ const UploadAvatar = ({ user }: { user: Partial<User> }) => {
   return (
     <form onSubmit={handleSubmit}>
       <Card>
-        <Card.Body>
-          <Card.Header>
-            <Card.Title>{t('avatar')}</Card.Title>
-            <Card.Description>
-              {t('custom-avatar')} <br />
-              {t('avatar-type')}
-            </Card.Description>
-          </Card.Header>
+        <CardHeader>
+          <CardTitle>{t('avatar')}</CardTitle>
+          <CardDescription>
+            {t('custom-avatar')} <br />
+            {t('avatar-type')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
           <div>
             <label
               htmlFor="image"
@@ -155,18 +162,17 @@ const UploadAvatar = ({ user }: { user: Partial<User> }) => {
               />
             </div>
           </div>
-        </Card.Body>
-        <Card.Footer>
+        </CardContent>
+        <CardFooter>
           <Button
             type="submit"
-            color="primary"
-            size="md"
+            variant="default"
             disabled={!image || image === user.image}
-            loading={loading}
+            className={loading ? "opacity-70 pointer-events-none" : ""}
           >
-            {t('save-changes')}
+            {loading ? t('saving') : t('save-changes')}
           </Button>
-        </Card.Footer>
+        </CardFooter>
       </Card>
     </form>
   );
