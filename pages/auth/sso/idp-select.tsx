@@ -1,5 +1,6 @@
 import { AuthLayout } from '@/components/layouts';
 import { LetterAvatar } from '@/components/shared';
+import { Button } from '@/lib/components/ui/button';
 import jackson from '@/lib/jackson';
 import { SAMLSSORecord } from '@boxyhq/saml-jackson';
 import type { GetServerSidePropsContext } from 'next';
@@ -23,9 +24,10 @@ export default function IdPSelection({ connections }: IdPSelectionProps) {
         <div className="flex flex-col gap-4">
           {connections.map((connection) => {
             return (
-              <button
+              <Button
                 type="button"
-                className="w-full btn btn-outline justify-start"
+                variant="outline"
+                className="w-full justify-start"
                 onClick={() => {
                   connectionSelected(connection.clientID);
                 }}
@@ -35,7 +37,7 @@ export default function IdPSelection({ connections }: IdPSelectionProps) {
                   {connection.name && <LetterAvatar name={connection.name} />}
                   <div>{connection.name}</div>
                 </div>
-              </button>
+              </Button>
             );
           })}
         </div>
