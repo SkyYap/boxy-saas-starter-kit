@@ -1,14 +1,12 @@
 import React from 'react';
-import { Alert as AlertCore, AlertProps } from 'react-daisyui';
+import { Alert } from '@/lib/components/ui/alert';
 
-const Alert = (props: AlertProps) => {
-  const { children, className, ...rest } = props;
-
+const CustomAlert = ({ children, className, ...rest }) => {
   return (
-    <AlertCore {...rest} className={`${className} rounded px-4 py-3`}>
+    <Alert className={className} {...rest}>
       {children}
-    </AlertCore>
+    </Alert>
   );
 };
 
-export default Alert;
+export default CustomAlert;

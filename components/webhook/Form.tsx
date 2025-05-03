@@ -3,12 +3,14 @@ import type { FormikConfig } from 'formik';
 import { useFormik } from 'formik';
 import { useTranslation } from 'next-i18next';
 import React from 'react';
-import { Button } from 'react-daisyui';
+import { Button } from '@/lib/components/ui/button';
 import type { WebhookFormSchema } from 'types';
 import * as Yup from 'yup';
 import Modal from '../shared/Modal';
 import { EventTypes } from '@/components/webhook';
 import { maxLengthPolicies } from '@/lib/common';
+import { Separator } from '@/lib/components/ui/separator';
+import { Label } from '@/lib/components/ui/label';
 
 interface FormProps {
   visible: boolean;
@@ -70,11 +72,9 @@ const Form = ({
               error={formik.errors.url}
               descriptionText="The endpoint URL must be HTTPS"
             />
-            <div className="divider"></div>
-            <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text">{t('events-to-send')}</span>
-              </label>
+            <Separator />
+            <div className="w-full">
+              <Label className="mb-1">{t('events-to-send')}</Label>
               <p className="ml-1 mb-3 text-sm font-normal text-gray-500">
                 {t('events-description')}
               </p>
@@ -92,19 +92,18 @@ const Form = ({
           <Button
             type="button"
             variant="outline"
+            size="default"
             onClick={() => {
               setVisible(!visible);
             }}
-            size="md"
           >
             {t('close')}
           </Button>
           <Button
             type="submit"
-            color="primary"
-            loading={formik.isSubmitting}
-            active={formik.dirty}
-            size="md"
+            variant="default"
+            size="default"
+            disabled={formik.isSubmitting || !formik.dirty}
           >
             {editMode ? t('update-webhook') : t('create-webhook')}
           </Button>

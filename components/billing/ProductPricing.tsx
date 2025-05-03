@@ -1,5 +1,5 @@
 import toast from 'react-hot-toast';
-import { Button } from 'react-daisyui';
+import { Button } from '@/lib/components/ui/button';
 import { useTranslation } from 'next-i18next';
 
 import useTeam from 'hooks/useTeam';
@@ -67,10 +67,9 @@ const ProductPricing = ({ plans, subscriptions }: ProductPricingProps) => {
                     <Button
                       key={price.id}
                       variant="outline"
-                      size="md"
-                      fullWidth
+                      size="default"
+                      className="rounded-full w-full"
                       disabled
-                      className="rounded-full"
                     >
                       {t('current')}
                     </Button>

@@ -1,10 +1,10 @@
 import toast from 'react-hot-toast';
-import { Button } from 'react-daisyui';
+import { Button } from '@/lib/components/ui/button';
 import { useState } from 'react';
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'next-i18next';
 
-import { Card } from '@/components/shared';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/lib/components/ui/card';
 import { Team } from '@prisma/client';
 import { defaultHeaders } from '@/lib/common';
 import type { ApiResponse } from 'types';
@@ -42,25 +42,22 @@ const LinkToPortal = ({ team }: LinkToPortalProps) => {
 
   return (
     <Card>
-      <Card.Body>
-        <Card.Header>
-          <Card.Title>{t('manage-subscription')}</Card.Title>
-          <Card.Description>{t('manage-billing-information')}</Card.Description>
-        </Card.Header>
-        <div>
-          <Button
-            type="button"
-            color="primary"
-            size="sm"
-            variant="outline"
-            loading={loading}
-            onClick={() => openStripePortal()}
-          >
-            {t('billing-portal')}
-            <ArrowTopRightOnSquareIcon className="w-5 h-5 ml-2" />
-          </Button>
-        </div>
-      </Card.Body>
+      <CardHeader>
+        <CardTitle>{t('manage-subscription')}</CardTitle>
+        <CardDescription>{t('manage-billing-information')}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={loading}
+          onClick={openStripePortal}
+        >
+          {t('billing-portal')}
+          <ArrowTopRightOnSquareIcon className="w-5 h-5 ml-2" />
+        </Button>
+      </CardContent>
     </Card>
   );
 };

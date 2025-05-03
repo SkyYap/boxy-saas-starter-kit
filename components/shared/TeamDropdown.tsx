@@ -12,6 +12,14 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React from 'react';
 import { maxLengthPolicies } from '@/lib/common';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuItem,
+} from '@/lib/components/ui/dropdown-menu';
 
 const TeamDropdown = () => {
   const router = useRouter();
@@ -67,55 +75,35 @@ const TeamDropdown = () => {
   ];
 
   return (
-    <div className="dropdown w-full">
-      <div
-        tabIndex={0}
-        className="border border-gray-300 dark:border-gray-600 flex h-10 items-center px-4 justify-between cursor-pointer rounded text-sm font-bold"
-      >
-        {currentTeam?.name ||
-          data?.user?.name?.substring(
-            0,
-            maxLengthPolicies.nameShortDisplay
-          )}{' '}
-        <ChevronUpDownIcon className="w-5 h-5" />
-      </div>
-      <ul
-        tabIndex={0}
-        className="dropdown-content dark:border-gray-600 p-2 shadow-md bg-base-100 w-full rounded border px-2"
-      >
-        {menus.map(({ id, name, items }) => {
-          return (
-            <React.Fragment key={id}>
-              {name && (
-                <li
-                  className="text-xs text-gray-500 py-1 px-2"
-                  key={`${id}-name`}
-                >
-                  {name}
-                </li>
-              )}
-              {items.map((item) => (
-                <li
-                  key={`${id}-${item.id}`}
-                  onClick={() => {
-                    if (document.activeElement) {
-                      (document.activeElement as HTMLElement).blur();
-                    }
-                  }}
-                >
-                  <Link href={item.href}>
-                    <div className="flex hover:bg-gray-100 dark:hover:text-black focus:bg-gray-100 focus:outline-hidden py-2 px-2 rounded text-sm font-medium gap-2 items-center">
-                      <item.icon className="w-5 h-5" /> {item.name}
-                    </div>
-                  </Link>
-                </li>
-              ))}
-              {name && <li className="divider m-0" key={`${id}-divider`} />}
-            </React.Fragment>
-          );
-        })}
-      </ul>
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className="border border-gray-300 dark:border-gray-600 flex h-10 items-center px-4 justify-between cursor-pointer rounded text-sm font-bold w-full"
+        >
+          {currentTeam?.name ||
+            data?.user?.name?.substring(0, maxLengthPolicies.nameShortDisplay)}{' '}
+          <ChevronUpDownIcon className="w-5 h-5 ml-2" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-full min-w-[200px]">
+        {menus.map(({ id, name, items }, idx) => (
+          <React.Fragment key={id}>
+            {name && <DropdownMenuLabel>{name}</DropdownMenuLabel>}
+            {items.map((item) => (
+              <Link href={item.href} key={`${id}-${item.id}`} legacyBehavior passHref>
+                <DropdownMenuItem asChild>
+                  <a className="flex gap-2 items-center">
+                    <item.icon className="w-5 h-5" /> {item.name}
+                  </a>
+                </DropdownMenuItem>
+              </Link>
+            ))}
+            {idx < menus.length - 1 && <DropdownMenuSeparator />}
+          </React.Fragment>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 

@@ -2,7 +2,7 @@ import { InputWithCopyButton, InputWithLabel } from '@/components/shared';
 import type { Team } from '@prisma/client';
 import { useTranslation } from 'next-i18next';
 import { useState } from 'react';
-import { Button } from 'react-daisyui';
+import { Button } from '@/lib/components/ui/button';
 import { toast } from 'react-hot-toast';
 import { useSWRConfig } from 'swr';
 import type { ApiResponse } from 'types';
@@ -103,15 +103,12 @@ const CreateAPIKeyForm = ({
         />
       </Modal.Body>
       <Modal.Footer>
-        <Button type="button" variant="outline" onClick={closeModal} size="md">
+        <Button type="button" variant="outline" onClick={closeModal}>
           {t('close')}
         </Button>
         <Button
-          color="primary"
           type="submit"
-          loading={formik.isSubmitting}
-          disabled={!formik.dirty || !formik.isValid}
-          size="md"
+          disabled={!formik.dirty || !formik.isValid || formik.isSubmitting}
         >
           {t('create-api-key')}
         </Button>
@@ -136,7 +133,7 @@ const DisplayAPIKey = ({ apiKey, closeModal }: DisplayAPIKeyProps) => {
         />
       </Modal.Body>
       <Modal.Footer>
-        <Button type="button" variant="outline" onClick={closeModal} size="md">
+        <Button type="button" variant="outline" onClick={closeModal}>
           {t('close')}
         </Button>
       </Modal.Footer>

@@ -1,18 +1,11 @@
-import classNames from 'classnames';
-import { BadgeProps, Badge as BaseBadge } from 'react-daisyui';
+import { Badge as ShadcnBadge } from '@/lib/components/ui/badge';
 
-const Badge = (props: BadgeProps) => {
-  const { children, className } = props;
-
+const Badge = (props) => {
+  const { children, className, ...rest } = props;
   return (
-    <>
-      <BaseBadge
-        {...props}
-        className={classNames('rounded text-xs py-2 text-white', className)}
-      >
-        {children}
-      </BaseBadge>
-    </>
+    <ShadcnBadge className={className} {...rest}>
+      {children}
+    </ShadcnBadge>
   );
 };
 

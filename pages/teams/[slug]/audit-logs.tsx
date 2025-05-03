@@ -1,4 +1,4 @@
-import { Card } from '@/components/shared';
+import { Card, CardContent } from '@/lib/components/ui/card';
 import { Error, Loading } from '@/components/shared';
 import { TeamTab } from '@/components/team';
 import env from '@/lib/env';
@@ -54,7 +54,7 @@ const Events: NextPageWithLayout<inferSSRProps<typeof getServerSideProps>> = ({
     <>
       <TeamTab activeTab="audit-logs" team={team} teamFeatures={teamFeatures} />
       <Card>
-        <Card.Body>
+        <CardContent style={{ minHeight: '40px' }}>
           {canAccess('team_audit_log', ['read']) && auditLogToken && (
             <RetracedEventsBrowser
               host={`${retracedHost}/viewer/v1`}
@@ -62,7 +62,7 @@ const Events: NextPageWithLayout<inferSSRProps<typeof getServerSideProps>> = ({
               header={t('audit-logs')}
             />
           )}
-        </Card.Body>
+        </CardContent>
       </Card>
     </>
   );

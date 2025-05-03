@@ -1,30 +1,30 @@
 import React from 'react';
-import { Checkbox } from 'react-daisyui';
+import { Checkbox as ShadcnCheckbox } from '@/lib/components/ui/checkbox';
 
 const CheckboxComponent = ({
-  onChange,
+  onCheckedChange,
   name,
   value,
   label,
-  defaultChecked,
+  checked,
   className,
 }: {
-  onChange: React.ChangeEventHandler<HTMLInputElement>;
+  onCheckedChange: React.ChangeEventHandler<HTMLInputElement>;
   name: string;
   value: string;
   label: string;
-  defaultChecked: boolean;
+  checked: boolean;
   className?: string;
 }) => {
   return (
     <div className={`flex items-center ${className || ''}`} key={value}>
       <label className="flex items-center gap-2 text-sm">
-        <Checkbox
+        <ShadcnCheckbox
           name={name}
           value={value}
-          onChange={onChange}
-          defaultChecked={Boolean(defaultChecked)}
-          className="h-4 w-4 rounded [--chkfg:oklch(var(--p))] [--chkbg:white]"
+          onCheckedChange={onCheckedChange}
+          checked={checked}
+          className="h-4 w-4 rounded"
         />
         <span className="text-gray-700">{label}</span>
       </label>

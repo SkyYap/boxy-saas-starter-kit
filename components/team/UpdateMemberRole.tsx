@@ -4,6 +4,7 @@ import { Team, TeamMember } from '@prisma/client';
 import { useTranslation } from 'next-i18next';
 import toast from 'react-hot-toast';
 import type { ApiResponse } from 'types';
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/lib/components/ui/select';
 
 interface UpdateMemberRoleProps {
   team: Team;
@@ -34,17 +35,18 @@ const UpdateMemberRole = ({ team, member }: UpdateMemberRoleProps) => {
   };
 
   return (
-    <select
-      className="select select-bordered select-sm rounded"
-      defaultValue={member.role}
-      onChange={(e) => updateRole(member, e.target.value)}
-    >
-      {availableRoles.map((role) => (
-        <option value={role.id} key={role.id}>
-          {role.id}
-        </option>
-      ))}
-    </select>
+    <Select defaultValue={member.role} onValueChange={(value) => updateRole(member, value)}>
+      <SelectTrigger className="w-[120px]">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {availableRoles.map((role) => (
+          <SelectItem value={role.id} key={role.id}>
+            {role.id}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 };
 

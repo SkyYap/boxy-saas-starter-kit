@@ -1,9 +1,9 @@
-import { Card } from '@/components/shared';
+import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from '@/lib/components/ui/card';
+import { Button } from '@/lib/components/ui/button';
 import { Team } from '@prisma/client';
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
-import { Button } from 'react-daisyui';
 import toast from 'react-hot-toast';
 
 import ConfirmationDialog from '../shared/ConfirmationDialog';
@@ -44,28 +44,24 @@ const RemoveTeam = ({ team, allowDelete }: RemoveTeamProps) => {
   return (
     <>
       <Card>
-        <Card.Body>
-          <Card.Header>
-            <Card.Title>{t('remove-team')}</Card.Title>
-            <Card.Description>
-              {allowDelete
-                ? t('remove-team-warning')
-                : t('remove-team-restricted')}
-            </Card.Description>
-          </Card.Header>
-        </Card.Body>
+        <CardHeader>
+          <CardTitle>{t('remove-team')}</CardTitle>
+          <CardDescription>
+            {allowDelete
+              ? t('remove-team-warning')
+              : t('remove-team-restricted')}
+          </CardDescription>
+        </CardHeader>
         {allowDelete && (
-          <Card.Footer>
+          <CardFooter>
             <Button
-              color="error"
+              variant="destructive"
               onClick={() => setAskConfirmation(true)}
-              loading={loading}
-              variant="outline"
-              size="md"
+              disabled={loading}
             >
               {t('remove-team')}
             </Button>
-          </Card.Footer>
+          </CardFooter>
         )}
       </Card>
       {allowDelete && (

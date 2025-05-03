@@ -19,9 +19,9 @@ const EventTypes = ({
       <Checkbox
         name="eventTypes"
         value={eventType}
-        onChange={onChange}
+        onCheckedChange={onChange}
         label={eventType}
-        defaultChecked={values ? values.includes(eventType) : false}
+        checked={values ? values.includes(eventType) : false}
       />
     );
   });
@@ -30,7 +30,7 @@ const EventTypes = ({
     <>
       {events}
       {error && typeof error === 'string' && (
-        <div className="label-text-alt text-red-500">{error}</div>
+        <div className="text-xs text-destructive">{error}</div>
       )}
     </>
   );

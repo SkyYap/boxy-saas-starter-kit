@@ -77,7 +77,7 @@ const Header = ({ setSidebarOpen }: HeaderProps) => {
             </Button>
 
             {isOpen && (
-              <div className="absolute right-0 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-md z-10 p-1 space-y-1 dark:bg-gray-800 dark:border-gray-700">
+              <div className="absolute right-0 mt-2 w-44 rounded-md border border-gray-200 bg-white shadow-md z-10 p-1 space-y-1 dark:bg-gray-800 dark:border-gray-700">
                 <Link href="/settings/account">
                   <Button
                     variant="ghost"

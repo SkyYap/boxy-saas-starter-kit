@@ -13,34 +13,78 @@ import { useRouter } from 'next/router';
 import { type ReactElement, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import type { NextPageWithLayout } from 'types';
+import type { TeamWithMemberCount } from 'types/base';
+import { Card, CardHeader, CardTitle, CardContent } from '@/lib/components/ui/card';
+import { Button } from '@/lib/components/ui/button';
+import LetterAvatar from '@/components/shared/LetterAvatar';
+import Link from 'next/link';
 
 const Organizations: NextPageWithLayout<
   InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ teams }) => {
+> = ({ teams }: { teams: TeamWithMemberCount[] | null }) => {
   const router = useRouter();
   const { t } = useTranslation('common');
   const { status } = useSession();
 
-  if (status === 'unauthenticated') {
-    router.push('/auth/login');
-  }
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/login');
+    }
+  }, [status, router]);
 
   useEffect(() => {
     if (teams === null) {
       toast.error(t('no-active-team'));
       return;
     }
+    if (teams && teams.length === 1) {
+      // If only one team, auto-select
+      router.push(`/teams/${teams[0].slug}/settings`);
+    }
+  }, [teams, t, router]);
 
-    router.push(`/dashboard`);
-  });
+  const handleSelectTeam = (slug: string) => {
+    router.push(`/teams/${slug}/settings`);
+  };
 
   return (
-    <>
-      <div className="mb-6 flex w-1/2 flex-col items-center gap-4 p-3">
-        <h3>{t('choose-team')}</h3>
-        <div className="w-3/5 rounded bg-white dark:border dark:border-gray-700 dark:bg-gray-800 sm:max-w-md md:mt-0 xl:p-0"></div>
-      </div>
-    </>
+    <div className="flex min-h-[60vh] w-full items-center justify-center">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>{t('choose-team')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {(!teams || teams.length === 0) && (
+            <div className="text-center text-muted-foreground py-8">
+              {t('no-active-team')}
+            </div>
+          )}
+          {teams && teams.length > 0 && (
+            <div className="space-y-2">
+              {teams.map((team) => (
+                <Button
+                  key={team.id}
+                  variant="outline"
+                  className="w-full flex items-center justify-start gap-3"
+                  onClick={() => handleSelectTeam(team.slug)}
+                >
+                  <LetterAvatar name={team.name} />
+                  <span className="font-medium">{team.name}</span>
+                  <span className="ml-auto text-xs text-muted-foreground">
+                    {t('members')}: {team._count.members}
+                  </span>
+                </Button>
+              ))}
+              <div className="pt-4 border-t mt-4">
+                <Button asChild className="w-full" variant="secondary">
+                  <Link href="/teams?newTeam=true">{t('create-team')}</Link>
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

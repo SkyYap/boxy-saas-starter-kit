@@ -4,7 +4,7 @@ import useCanAccess from 'hooks/useCanAccess';
 import useTeamMembers, { TeamMemberWithUser } from 'hooks/useTeamMembers';
 import { useSession } from 'next-auth/react';
 import { useTranslation } from 'next-i18next';
-import { Button } from 'react-daisyui';
+import { Button } from '@/lib/components/ui/button';
 import toast from 'react-hot-toast';
 
 import { InviteMember } from '@/components/invitation';
@@ -95,7 +95,7 @@ const Members = ({ team }: { team: Team }) => {
             {t('members-description')}
           </p>
         </div>
-        <Button color="primary" size="md" onClick={() => setVisible(!visible)}>
+        <Button variant="default" size="default" onClick={() => setVisible(!visible)}>
           {t('add-member')}
         </Button>
       </div>

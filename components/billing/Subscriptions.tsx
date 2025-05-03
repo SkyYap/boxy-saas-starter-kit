@@ -15,29 +15,31 @@ const Subscriptions = ({ subscriptions }: SubscriptionsProps) => {
 
   return (
     <div className="space-y-3">
-      <h2 className="card-title text-xl font-medium leading-none tracking-tight">
+      <h2 className="text-xl font-medium leading-none tracking-tight">
         {t('subscriptions')}
       </h2>
-      <table className="table w-full text-sm border">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>{t('plan')}</th>
-            <th>{t('start-date')}</th>
-            <th>{t('end-date')}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {subscriptions.map((subscription) => (
-            <tr key={subscription.id}>
-              <td>{subscription.id}</td>
-              <td>{subscription.product.name}</td>
-              <td>{new Date(subscription.startDate).toLocaleDateString()}</td>
-              <td>{new Date(subscription.endDate).toLocaleDateString()}</td>
+      <div className="overflow-x-auto rounded-lg border">
+        <table className="min-w-full text-sm">
+          <thead className="bg-muted">
+            <tr>
+              <th className="px-4 py-2 text-left">ID</th>
+              <th className="px-4 py-2 text-left">{t('plan')}</th>
+              <th className="px-4 py-2 text-left">{t('start-date')}</th>
+              <th className="px-4 py-2 text-left">{t('end-date')}</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {subscriptions.map((subscription) => (
+              <tr key={subscription.id} className="border-t">
+                <td className="px-4 py-2">{subscription.id}</td>
+                <td className="px-4 py-2">{subscription.product.name}</td>
+                <td className="px-4 py-2">{new Date(subscription.startDate).toLocaleDateString()}</td>
+                <td className="px-4 py-2">{new Date(subscription.endDate).toLocaleDateString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
