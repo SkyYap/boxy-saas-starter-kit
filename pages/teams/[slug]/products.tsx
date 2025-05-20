@@ -7,7 +7,7 @@ const Products: NextPageWithLayout = () => {
   const { t } = useTranslation('common');
 
   return (
-    <div className="p-3">
+    <div className="p-10">
       <p className="text-sm">{t('product-placeholder')}</p>
     </div>
   );

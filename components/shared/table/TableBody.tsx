@@ -3,8 +3,8 @@ import Badge from '@/components/shared/Badge';
 import { useTranslation } from 'next-i18next';
 
 const trClass =
-  'border-b bg-white last:border-b-0 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800';
-const tdClassBase = 'px-6 py-3 text-sm text-gray-500 dark:text-gray-400';
+  'border-b bg-white last:border-b-0 hover:bg-gray-50 dark:border-gray-700 dark:bg-background';
+const tdClassBase = 'px-6 py-3 text-sm text-gray-500 dark:text-gray-100';
 const tdClass = `whitespace-nowrap ${tdClassBase}`;
 const tdClassWrap = `break-all ${tdClassBase}`;
 

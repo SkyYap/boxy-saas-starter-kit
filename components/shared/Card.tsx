@@ -2,7 +2,7 @@ import React from 'react';
 
 const Card = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="card w-full border border-rounded dark:bg-black dark:border-gray-600">
+    <div className="card w-full border border-rounded bg-background border-gray-600">
       {children}
     </div>
   );
@@ -27,12 +27,12 @@ const Header = ({ children }: { children: React.ReactNode }) => {
 };
 
 const Body = ({ children }: { children: React.ReactNode }) => {
-  return <div className="card-body dark:bg-black gap-4 p-6">{children}</div>;
+  return <div className="card-body bg-background gap-4 p-6">{children}</div>;
 };
 
 const Footer = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="card-actions justify-end dark:border-gray-600 p-2 border-t bg-gray-50 dark:bg-black">
+    <div className="card-actions justify-end border-gray-600 p-2 border-t bg-background">
       {children}
     </div>
   );

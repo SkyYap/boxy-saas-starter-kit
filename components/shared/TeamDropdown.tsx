@@ -64,12 +64,6 @@ const TeamDropdown = () => {
           href: '/teams',
           icon: RectangleStackIcon,
         },
-        {
-          id: 'new-team',
-          name: t('new-team'),
-          href: '/teams?newTeam=true',
-          icon: FolderPlusIcon,
-        },
       ],
     },
   ];

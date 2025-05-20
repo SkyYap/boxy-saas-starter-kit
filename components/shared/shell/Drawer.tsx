@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import TeamDropdown from '../TeamDropdown';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import Brand from './Brand';
 import Navigation from './Navigation';
 import { useTranslation } from 'next-i18next';
@@ -8,9 +8,11 @@ import { useTranslation } from 'next-i18next';
 interface DrawerProps {
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
+  collapsed: boolean;
+  setCollapsed: (c: boolean) => void;
 }
 
-const Drawer = ({ sidebarOpen, setSidebarOpen }: DrawerProps) => {
+const Drawer = ({ sidebarOpen, setSidebarOpen, collapsed, setCollapsed }: DrawerProps) => {
   const { t } = useTranslation('common');
 
   return (
@@ -33,7 +35,7 @@ const Drawer = ({ sidebarOpen, setSidebarOpen }: DrawerProps) => {
                   />
                 </button>
               </div>
-              <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white dark:bg-black px-6 pb-4">
+              <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-background px-6 pb-4">
                 <Brand />
                 <TeamDropdown />
                 <Navigation />
@@ -43,11 +45,39 @@ const Drawer = ({ sidebarOpen, setSidebarOpen }: DrawerProps) => {
         </div>
       )}
 
-      <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64 lg:flex-col">
-        <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 px-6">
-          <Brand />
-          <TeamDropdown />
-          <Navigation />
+      {/* Desktop sidebar with collapse */}
+      <div className={`hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:flex-col transition-all duration-300 ${collapsed ? 'lg:w-16' : 'lg:w-64'}`}>
+        <div className="flex flex-col gap-y-5 overflow-y-auto border-r px-2 h-full">
+          {collapsed ? (
+            <div className="flex flex-1 flex-col items-center justify-center">
+              <button
+                type="button"
+                className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+                onClick={() => setCollapsed(false)}
+                aria-label={t('expand-sidebar')}
+              >
+                <ChevronRightIcon className="h-5 w-5" />
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between pt-6 px-4">
+                <Brand collapsed={false} />
+                <button
+                  type="button"
+                  className="ml-2 p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+                  onClick={() => setCollapsed(true)}
+                  aria-label={t('collapse-sidebar')}
+                >
+                  <ChevronLeftIcon className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="flex flex-col gap-y-5">
+                <TeamDropdown />
+                <Navigation />
+              </div>
+            </>
+          )}
         </div>
       </div>
     </>

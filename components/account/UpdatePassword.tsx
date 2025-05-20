@@ -43,7 +43,16 @@ const UpdatePassword = () => {
       const json = await response.json();
 
       if (!response.ok) {
-        toast.error(json.error.message);
+        // Try to show a user-friendly error
+        let errorMsg = json.error?.message;
+        if (
+          errorMsg === "Illegal arguments: string, object" ||
+          !errorMsg ||
+          typeof errorMsg !== "string"
+        ) {
+          errorMsg = "Wrong current password.";
+        }
+        toast.error(errorMsg);
         return;
       }
 

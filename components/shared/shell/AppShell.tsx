@@ -10,6 +10,7 @@ export default function AppShell({ children }) {
   const router = useRouter();
   const { status } = useSession();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   if (status === 'loading') {
     return <Loading />;
@@ -22,8 +23,8 @@ export default function AppShell({ children }) {
 
   return (
     <div>
-      <Drawer sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-      <div className="lg:pl-64">
+      <Drawer sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} collapsed={collapsed} setCollapsed={setCollapsed} />
+      <div className={collapsed ? 'lg:pl-16' : 'lg:pl-64'}>
         <Header setSidebarOpen={setSidebarOpen} />
         <main className="py-5">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

@@ -9,14 +9,24 @@ import { getSession } from '@/lib/session';
 import { getUserBySession } from 'models/user';
 import { UpdateAccount } from '@/components/account';
 import env from '@/lib/env';
+import UpdatePassword from '@/components/account/UpdatePassword';
+import ManageSessions from '@/components/account/ManageSessions';
 
 type AccountProps = InferGetServerSidePropsType<typeof getServerSideProps>;
 
 const Account: NextPageWithLayout<AccountProps> = ({
   user,
-  allowEmailChange,
+  sessionStrategy,
 }) => {
-  return <UpdateAccount user={user} allowEmailChange={allowEmailChange} />;
+  return (
+    <>
+      <UpdateAccount user={user} allowEmailChange={env.confirmEmail === false} />
+      <div className="flex flex-col space-y-6 mt-8">
+        <UpdatePassword />
+        {sessionStrategy === 'database' && <ManageSessions />}
+      </div>
+    </>
+  );
 };
 
 export const getServerSideProps = async (
@@ -25,6 +35,7 @@ export const getServerSideProps = async (
   const session = await getSession(context.req, context.res);
   const user = await getUserBySession(session);
   const { locale } = context;
+  const { sessionStrategy } = env.nextAuth;
 
   if (!user) {
     return {
@@ -41,7 +52,7 @@ export const getServerSideProps = async (
         name: user.name,
         image: user.image,
       },
-      allowEmailChange: env.confirmEmail === false,
+      sessionStrategy,
     },
   };
 };
